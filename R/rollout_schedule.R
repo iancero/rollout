@@ -1,3 +1,16 @@
+cur_phase <- function(cohort, time, step_dur = 1, phase_durs = c(2, 3, Inf), use_names = TRUE){
+  offset <- step_dur * (cohort - 1)
+  crossovers <- offset + cumsum(phase_durs)
+
+  phase <- findInterval(time, vec = crossovers, left.open = TRUE) + 1
+
+  if(use_names & !is.null(names(phase_durs))){
+    phase <- names(phase_durs)[phase]
+  }
+
+  phase
+}
+
 stepped_wedge_crossover <- function(site_indices, init_baseline, step_duration) {
   step_duration * (site_indices - 1) + init_baseline + 1
 }
