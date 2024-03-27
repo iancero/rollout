@@ -3,7 +3,7 @@ stepped_wedge_crossover <- function(cohort_indices, init_baseline, step_duration
 }
 
 
-add_stepped_wedge <- function(.data, step_duration = 1, init_baseline = 1, condition_names = c("a", "b"), drop = TRUE) {
+assign_stepped_wedge <- function(.data, step_duration = 1, init_baseline = 1, condition_names = c("a", "b"), drop = TRUE) {
 
   .data <- .data |>
     mutate(
