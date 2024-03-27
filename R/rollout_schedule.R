@@ -60,3 +60,29 @@ assign_head2head <- function(.data, condition_names = list("a", c("b", "c")), st
     ) |>
     group_by(!!!grouping_vars)
 }
+
+
+assign_single_wedge <- function(.data, step_duration = 1, condition_name = "a", drop = TRUE, prestudy_missing = FALSE) {
+  .data <- .data |>
+    assign_stepped_wedge(
+      step_duration = step_duration,
+      init_baseline = 0,
+      condition_names = c(".prestudy", condition_name),
+      drop = FALSE) |>
+    mutate(.condition = if_else(
+      condition = .condition == ".prestudy",
+      true = NA_character_,
+      false = .condition))
+
+  if (!prestudy_missing){
+    .data <- .data |>
+      dplyr::filter(time >= .crossover_time)
+  }
+
+  if (drop) {
+    .data <- .data |>
+      select(-.crossover_time)
+  }
+
+  .data
+}
