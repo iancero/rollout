@@ -1,8 +1,28 @@
-cur_phase <- function(cohort, time, step_dur = 1, phase_durs = c(2, 3, Inf), use_names = TRUE){
-  offset <- step_dur * (cohort - 1)
-  crossovers <- offset + cumsum(phase_durs)
+phase_start_offset <- function(cohort, step_dur = 1){
+  step_dur * (cohort - 1)
+}
 
-  phase <- findInterval(time, vec = crossovers, left.open = TRUE) + 1
+phase_transitions <- function(phase_durs, initial_offset = 0) {
+  initial_offset + cumsum(phase_durs)
+}
+
+extract_phase_block <- function(phase, block){
+  if (length(phase) > 1) phase[block] else phase
+}
+
+extract_block_schedule <- function(phase_durs, block){
+  phase_durs |>
+    map(~ extract_phase_block(.x, block)) |>
+    flatten()
+}
+
+cur_phase <- function(time, cohort, block = 1, step_dur = 1, phase_durs = c(step_dur, Inf), use_names = TRUE){
+
+  initial_offset <- phase_start_offset(cohort, step_dur)
+  block_specific_phases <- extract_block_schedule(phase_durs, block)
+  transition_times <- phase_transitions(block_specific_phases, initial_offset)
+
+  phase <- findInterval(time, vec = transition_times, left.open = TRUE) + 1
 
   if(use_names & !is.null(names(phase_durs))){
     phase <- names(phase_durs)[phase]
