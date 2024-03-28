@@ -7,7 +7,7 @@
 sim_normal_error(.data, sd = 1)
 }
 \arguments{
-\item{.data}{A dataframe}
+\item{.data}{A dataframe with simulated rollout data}
 
 \item{sd}{The standard deviation of the error term}
 }
