@@ -16,6 +16,12 @@ extract_block_schedule <- function(phase_durs, block){
     flatten()
 }
 
+phase_interval_num <- function(time, transition_times){
+  findInterval(time, vec = transition_times, left.open = TRUE) + 1
+}
+
+
+
 cur_phase <- function(time, cohort, block = 1, step_dur = 1, phase_durs = c(step_dur, Inf), use_phase_names = TRUE, phase_zero_na = FALSE){
 
   initial_offset <- phase_start_offset(cohort, step_dur)
@@ -27,7 +33,7 @@ cur_phase <- function(time, cohort, block = 1, step_dur = 1, phase_durs = c(step
 
   transition_times <- phase_transitions(block_specific_phases, initial_offset)
 
-  phase <- findInterval(time, vec = transition_times, left.open = TRUE) + 1
+  phase <- phase_interval_num(time, transition_times)
 
 
   if(use_names & !is.null(names(phase_durs))){
