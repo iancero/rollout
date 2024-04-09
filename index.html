@@ -73,12 +73,12 @@
 <div class="section level2">
 <h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
 </h2>
-<p>Evaluating the power of a rollout design minimally involves:</p>
+<p>Evaluating the power of a rollout design involves:</p>
 <ol style="list-style-type: decimal">
-<li>Specifying the rollout schedule, expected intervention effects, and other sample characteristics (e.g., number of cohorts, sample size of each cohort).</li>
+<li>Specifying the rollout schedule and expected intervention effects</li>
 <li>Simulating several datasets</li>
 <li>Fitting a statistical model to each dataset</li>
-<li>Evaluating the statistical properties (e.g., power) of those fitted models.</li>
+<li>Evaluating the statistical properties (e.g., power) of those fitted models</li>
 </ol>
 <p>The rollout package provides functions to help you with each of these steps.</p>
 </div>
@@ -88,22 +88,22 @@
 <p>In this step, we specify the rollout schedule and expected effects of the intervention. For example, we might specify that the intervention will be rolled out in three phases, each lasting a different amount of time.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Note, the rollout package measures time in discrete steps, like days, months, or years. However, it is agnostic to units, so phases all need to be specified on the same time scale (e.g., if &lt;code&gt;baseline = 3&lt;/code&gt; signifies “3 months” in your design, rollout will then assume &lt;code&gt;intervention = 2&lt;/code&gt; is also in months). Lastly, the package does not (yet) support continuous time.&lt;/p&gt;"><sup>1</sup></a></p>
 <ul>
 <li>A three month <strong>baseline phase</strong>, in which no intervention is applied, but data from each participating cohort are collected.</li>
-<li>An two month intervention phase, in which each cohort receives the intervention</li>
-<li>A four month sustainment, in which the intervention is no longer applied, but data are still collected to evaluate whether the effects of the intervention persist beyond its initial application.</li>
+<li>An two month <strong>intervention phase</strong>, in which each cohort receives the intervention</li>
+<li>A four month <strong>sustainment phase</strong>, in which the intervention is no longer applied, but data are still collected to evaluate whether the effects of the intervention persist beyond its initial application.</li>
 </ul>
-<p>Specifying the rollout schedule in the rollout package is done by creating a named list of phase durations. The names of the list elements correspond to the names of the phases, and the values correspond to the duration of each phase in time steps. For example, the rollout schedule described above would be specified as follows:</p>
+<p>Specifying the <strong>rollout schedule</strong> in the rollout package is done by creating a named list of rollout <strong>phase durations</strong>. The names of the list elements correspond to the names of the phases, and the values correspond to the duration of each phase in time steps. For example, the rollout schedule described above would be specified as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iancero/rollout" class="external-link">rollout</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">phase_durations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="fl">3</span>, intervention <span class="op">=</span> <span class="fl">2</span>, sustainment <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<p>Phase effects are specified in a similar way. For example, we might specify that the intervention has no effect during the baseline phase, a positive effect during the intervention phase, and a smaller positive effect during the sustainment phase.</p>
+<p><strong>Phase effects</strong> are specified in a similar way. For example, we might specify that the intervention has no effect during the baseline phase, a positive effect during the intervention phase, and a smaller positive effect during the sustainment phase.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">phase_effects</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="fl">0</span>, intervention <span class="op">=</span> <span class="fl">2</span>, sustainment <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="simulating-rollout-sample-data">Simulating rollout sample data<a class="anchor" aria-label="anchor" href="#simulating-rollout-sample-data"></a>
 </h2>
-<p>In addition to the rollout schedule and expected effects, we need to specify a few additional simulation parameters. For example, we might specify that our design is rolled out across 12 cohorts, each with 100 subjects.</p>
+<p>Before generating rollout sample data, we need to specify a few more simulation parameters. For example, we might specify that our design is rolled out across 12 cohorts, each with 100 subjects.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_cohorts</span> <span class="op">&lt;-</span> <span class="fl">12</span></span>
 <span><span class="va">subjects_per_cohort</span> <span class="op">&lt;-</span> <span class="fl">100</span></span></code></pre></div>
@@ -117,9 +117,78 @@
 <span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we simulate several datasets consistent with the rollout schedule and expected effects. The <code>simulate_rollout_samples()</code> function generates a dataset with the specified number of cohorts and subjects per cohort, and adds columns for the phase, time, and outcome variables. The outcome variable is generated by summing the effects of the phase, time, and random error terms.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_samples_df</span> <span class="op">&lt;-</span> <span class="fu">simulate_rollout_samples</span><span class="op">(</span></span>
-<span>  n_samples <span class="op">=</span> <span class="fl">100</span>, </span>
-<span>  params <span class="op">=</span> <span class="va">sim_params</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">simulated_samples_df</span> <span class="op">&lt;-</span> <span class="fu">simulate_rollout_samples</span><span class="op">(</span><span class="va">sim_params</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="fitting-a-statistical-model">Fitting a statistical model<a class="anchor" aria-label="anchor" href="#fitting-a-statistical-model"></a>
+</h2>
+<p>Next, we fit a statistical model to each simulated dataset. The <code>fit_model()</code> function fits a linear mixed-effects model to each dataset. The model includes fixed effects for the phase, time, and cohort, and random effects for the cohort and subject.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="st">"outcome ~ phase + time + (1 | cohort) + (1 | subject)"</span></span>
+<span><span class="va">fitted_models</span> <span class="op">&lt;-</span> <span class="fu">fit_model</span><span class="op">(</span><span class="va">simulated_samples_df</span>, <span class="va">model</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="evaluating-design-properties">Evaluating design properties<a class="anchor" aria-label="anchor" href="#evaluating-design-properties"></a>
+</h2>
+<p>Finally, we evaluate the statistical properties of the fitted models. The <code>eval_design()</code> function calculates a range of useful statistics, including the power and bias of the estimated intervention effect for each phase.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">eval_design</span><span class="op">(</span><span class="va">fitted_models</span>, feature <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power"</span>, <span class="st">"bias"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level1">
+<h1 id="advanced-features">Advanced features<a class="anchor" aria-label="anchor" href="#advanced-features"></a>
+</h1>
+<p>The rollout package includes a number of advanced features to help you simulate and evaluate rollout designs.</p>
+<div class="section level2">
+<h2 id="complex-phase-schedules">Complex phase schedules<a class="anchor" aria-label="anchor" href="#complex-phase-schedules"></a>
+</h2>
+</div>
+<div class="section level2">
+<h2 id="custom-phase-effects">Custom phase effects<a class="anchor" aria-label="anchor" href="#custom-phase-effects"></a>
+</h2>
+</div>
+<div class="section level2">
+<h2 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a>
+</h2>
+</div>
+<div class="section level2">
+<h2 id="pipe-friendly">Pipe-friendly<a class="anchor" aria-label="anchor" href="#pipe-friendly"></a>
+</h2>
+<p>The rollout package is designed to be pipe-friendly, so you can easily chain together multiple functions to simulate and evaluate rollout designs. The entire workflow can be written in a single pipe, like this:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">sim_params</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">sim_samples</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">fit_models</span><span class="op">(</span><span class="va">model</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">eval_design</span><span class="op">(</span>feature <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power"</span>, <span class="st">"bias"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level1">
+<h1 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
+</h1>
+<p>Rollout trials are typically quite large, meaning simulations of rollout trials are even larger. The rollout package is therefore equipped with a range of features to speed up computation.</p>
+<div class="section level2">
+<h2 id="parallel-processing">Parallel processing<a class="anchor" aria-label="anchor" href="#parallel-processing"></a>
+</h2>
+<p>The rollout package supports parallel processing, which can significantly speed up simulations of large rollout trials. By default, the package uses the <code>future</code> package to run simulations in parallel. You can control the number of cores used for parallel processing by setting the <code>future::plan()</code> options.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu">plan</span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">sim_params</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">sim_samples</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">fit_models</span><span class="op">(</span><span class="va">model</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">eval_design</span><span class="op">(</span>feature <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power"</span>, <span class="st">"bias"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="threshold-inferences">Threshold inferences<a class="anchor" aria-label="anchor" href="#threshold-inferences"></a>
+</h2>
+<p>Although final inferences should be based on the full set of simulations, the study design process is typically iterative and exploratory. The rollout package supports “threshold inferences,” which can speed up simulations by stopping the simulation process early, if a given design statistic (e.g., power) has crossed a particilar threshold.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">sim_params</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">sim_samples</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">fit_models</span><span class="op">(</span><span class="va">model</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">eval_design</span><span class="op">(</span></span>
+<span>    feature <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power"</span>, <span class="st">"bias"</span><span class="op">)</span>, </span>
+<span>    threshold <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>power <span class="op">=</span> <span class="fl">0.8</span>, p <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 
