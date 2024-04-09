@@ -14,10 +14,11 @@ status](https://www.r-pkg.org/badges/version/rollout)](https://CRAN.R-project.or
 coverage](https://codecov.io/gh/iancero/rollout/branch/main/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout?branch=main)
 <!-- badges: end -->
 
-A rollout trial involves “rolling out” an intervention across different
-groups at different times (e.g., a stepped-wedge design is a kind of
-rollout design). The `rollout` package simulates and evaluates the power
-of a rollout study designs.
+A **rollout trial** involves “rolling out” an intervention across
+different sites or groups in incremental phases. There are many kinds of
+rollout trials (e.g., stepped-wedge, head-to-head, single-arm). The
+**rollout package** simulates and evaluates statistical properties
+(e.g., power) of a rollout study designs.
 
 ## Installation
 
@@ -27,35 +28,98 @@ You can install the development version of rollout like so:
 devtools::install_github("iancero/rollout")
 ```
 
-## Example
+## A basic example
 
-This is a basic example which shows you how to solve a common problem:
+Evaluating the power of a rollout design minimally involves:
+
+1.  Specifying the rollout schedule (i.e., rollout design), expected
+    effects of the intervention in that schedule, and other sample
+    characteristics (e.g., number of cohorts, sample size of each
+    cohort).
+2.  Simulating several datasets consistent with the rollout schedule and
+    expected effects.
+3.  Fitting a statistical model to each dataset (e.g., a multi-level
+    regression model to test the effects of the intervention).
+4.  Evaluating the statistical properties of those models. For example,
+    the power of the design can be estimated by tracking the proportion
+    of times the model successfully detects the “true” intervention
+    effect specified in Step 1.
+
+### Step 1: Specify the rollout schedule, expected effects, and sample characteristics
+
+In this step, we specify the rollout schedule and expected effects of
+the intervention. For example, we might specify that the intervention
+will be rolled out in three phases, each lasting a different amount of
+time.[^1]
+
+- A three month **baseline phase**, in which no intervention is applied,
+  but data from each participating cohort are collected.
+- An two month intervention phase, in which each cohort receives the
+  intervention
+- A four month sustainment, in which the intervention is no longer
+  applied, but data are still collected to evaluate whether the effects
+  of the intervention persist beyond its initial application.
+
+Specifying the rollout schedule in the rollout package is done by
+creating a named list of phase durations. The names of the list elements
+correspond to the names of the phases, and the values correspond to the
+duration of each phase in time steps. For example, the rollout schedule
+described above would be specified as follows:
 
 ``` r
 library(rollout)
-## basic example code
+
+phase_durations <- list(baseline = 3, intervention = 2, sustainment = 4)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+Phase effects are specified in a similar way. For example, we might
+specify that the intervention has no effect during the baseline phase, a
+positive effect during the intervention phase, and a smaller positive
+effect during the sustainment phase.
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+phase_effects <- list(baseline = 0, intervention = 2, sustainment = 1)
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
+Lastly, we specify the number of cohorts and the number of subjects in
+each cohort. For example, we might specify that there are 12 cohorts,
+each with 100 subjects.
 
-You can also embed plots, for example:
+``` r
+n_cohorts <- 12
+subjects_per_cohort <- 100
+```
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+All of these specifications are then combined into a named list that is
+passed to the `simulate_rollout_samples()` function.
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+``` r
+sim_params <- list(
+  phase_durations = phase_durations,
+  phase_effects = phase_effects,
+  n_cohorts = n_cohorts,
+  subjects_per_cohort = subjects_per_cohort
+)
+```
+
+### Step 2: Simulate data consistent with the rollout schedule and expected effects
+
+In this step, we simulate several datasets consistent with the rollout
+schedule and expected effects. The `simulate_rollout_samples()` function
+generates a dataset with the specified number of cohorts and subjects
+per cohort, and adds columns for the phase, time, and outcome variables.
+The outcome variable is generated by summing the effects of the phase,
+time, and random error terms.
+
+``` r
+simulated_samples_df <- simulate_rollout_samples(
+  n_samples = 100, 
+  params = sim_params)
+```
+
+[^1]: Note, the rollout package measures time in discrete steps, like
+    days, months, or years. However, it is agnostic to units, so phases
+    all need to be specified on the same time scale (e.g., if
+    `baseline = 3` signifies “3 months” in your design, rollout will
+    then assume `intervention = 2` is also in months). Lastly, the
+    package does not (yet) support continuous time.
