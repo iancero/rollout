@@ -71,18 +71,20 @@
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"iancero/rollout"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="a-basic-example">A basic example<a class="anchor" aria-label="anchor" href="#a-basic-example"></a>
+<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
 </h2>
 <p>Evaluating the power of a rollout design minimally involves:</p>
 <ol style="list-style-type: decimal">
-<li>Specifying the rollout schedule (i.e., rollout design), expected effects of the intervention in that schedule, and other sample characteristics (e.g., number of cohorts, sample size of each cohort).</li>
-<li>Simulating several datasets consistent with the rollout schedule and expected effects.</li>
-<li>Fitting a statistical model to each dataset (e.g., a multi-level regression model to test the effects of the intervention).</li>
-<li>Evaluating the statistical properties of those models. For example, the power of the design can be estimated by tracking the proportion of times the model successfully detects the “true” intervention effect specified in Step 1.</li>
+<li>Specifying the rollout schedule, expected intervention effects, and other sample characteristics (e.g., number of cohorts, sample size of each cohort).</li>
+<li>Simulating several datasets</li>
+<li>Fitting a statistical model to each dataset</li>
+<li>Evaluating the statistical properties (e.g., power) of those fitted models.</li>
 </ol>
-<div class="section level3">
-<h3 id="step-1-specify-the-rollout-schedule-expected-effects-and-sample-characteristics">Step 1: Specify the rollout schedule, expected effects, and sample characteristics<a class="anchor" aria-label="anchor" href="#step-1-specify-the-rollout-schedule-expected-effects-and-sample-characteristics"></a>
-</h3>
+<p>The rollout package provides functions to help you with each of these steps.</p>
+</div>
+<div class="section level2">
+<h2 id="specifying-rollout-schedules-and-effects">Specifying rollout schedules and effects<a class="anchor" aria-label="anchor" href="#specifying-rollout-schedules-and-effects"></a>
+</h2>
 <p>In this step, we specify the rollout schedule and expected effects of the intervention. For example, we might specify that the intervention will be rolled out in three phases, each lasting a different amount of time.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Note, the rollout package measures time in discrete steps, like days, months, or years. However, it is agnostic to units, so phases all need to be specified on the same time scale (e.g., if &lt;code&gt;baseline = 3&lt;/code&gt; signifies “3 months” in your design, rollout will then assume &lt;code&gt;intervention = 2&lt;/code&gt; is also in months). Lastly, the package does not (yet) support continuous time.&lt;/p&gt;"><sup>1</sup></a></p>
 <ul>
 <li>A three month <strong>baseline phase</strong>, in which no intervention is applied, but data from each participating cohort are collected.</li>
@@ -97,11 +99,15 @@
 <p>Phase effects are specified in a similar way. For example, we might specify that the intervention has no effect during the baseline phase, a positive effect during the intervention phase, and a smaller positive effect during the sustainment phase.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">phase_effects</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="fl">0</span>, intervention <span class="op">=</span> <span class="fl">2</span>, sustainment <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>Lastly, we specify the number of cohorts and the number of subjects in each cohort. For example, we might specify that there are 12 cohorts, each with 100 subjects.</p>
+</div>
+<div class="section level2">
+<h2 id="simulating-rollout-sample-data">Simulating rollout sample data<a class="anchor" aria-label="anchor" href="#simulating-rollout-sample-data"></a>
+</h2>
+<p>In addition to the rollout schedule and expected effects, we need to specify a few additional simulation parameters. For example, we might specify that our design is rolled out across 12 cohorts, each with 100 subjects.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_cohorts</span> <span class="op">&lt;-</span> <span class="fl">12</span></span>
 <span><span class="va">subjects_per_cohort</span> <span class="op">&lt;-</span> <span class="fl">100</span></span></code></pre></div>
-<p>All of these specifications are then combined into a named list that is passed to the <code>simulate_rollout_samples()</code> function.</p>
+<p>Then, all of our these specifications are then combined into a named list that is passed to the <code>simulate_rollout_samples()</code> function.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  phase_durations <span class="op">=</span> <span class="va">phase_durations</span>,</span>
@@ -109,16 +115,11 @@
 <span>  n_cohorts <span class="op">=</span> <span class="va">n_cohorts</span>,</span>
 <span>  subjects_per_cohort <span class="op">=</span> <span class="va">subjects_per_cohort</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="step-2-simulate-data-consistent-with-the-rollout-schedule-and-expected-effects">Step 2: Simulate data consistent with the rollout schedule and expected effects<a class="anchor" aria-label="anchor" href="#step-2-simulate-data-consistent-with-the-rollout-schedule-and-expected-effects"></a>
-</h3>
-<p>In this step, we simulate several datasets consistent with the rollout schedule and expected effects. The <code>simulate_rollout_samples()</code> function generates a dataset with the specified number of cohorts and subjects per cohort, and adds columns for the phase, time, and outcome variables. The outcome variable is generated by summing the effects of the phase, time, and random error terms.</p>
+<p>Finally, we simulate several datasets consistent with the rollout schedule and expected effects. The <code>simulate_rollout_samples()</code> function generates a dataset with the specified number of cohorts and subjects per cohort, and adds columns for the phase, time, and outcome variables. The outcome variable is generated by summing the effects of the phase, time, and random error terms.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulated_samples_df</span> <span class="op">&lt;-</span> <span class="fu">simulate_rollout_samples</span><span class="op">(</span></span>
 <span>  n_samples <span class="op">=</span> <span class="fl">100</span>, </span>
 <span>  params <span class="op">=</span> <span class="va">sim_params</span><span class="op">)</span></span></code></pre></div>
-</div>
 </div>
 </div>
 
