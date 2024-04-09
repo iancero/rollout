@@ -14,14 +14,17 @@ status](https://www.r-pkg.org/badges/version/rollout)](https://CRAN.R-project.or
 coverage](https://codecov.io/gh/iancero/rollout/branch/main/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout?branch=main)
 <!-- badges: end -->
 
-The goal of rollout is to …
+A rollout trial involves “rolling out” an intervention across different
+groups at different times (e.g., a stepped-wedge design is a kind of
+rollout design). The `rollout` package simulates and evaluates the power
+of a rollout study designs.
 
 ## Installation
 
 You can install the development version of rollout like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+devtools::install_github("iancero/rollout")
 ```
 
 ## Example
