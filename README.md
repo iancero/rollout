@@ -28,24 +28,22 @@ You can install the development version of rollout like so:
 devtools::install_github("iancero/rollout")
 ```
 
-## A basic example
+## Workflow
 
 Evaluating the power of a rollout design minimally involves:
 
-1.  Specifying the rollout schedule (i.e., rollout design), expected
-    effects of the intervention in that schedule, and other sample
-    characteristics (e.g., number of cohorts, sample size of each
-    cohort).
-2.  Simulating several datasets consistent with the rollout schedule and
-    expected effects.
-3.  Fitting a statistical model to each dataset (e.g., a multi-level
-    regression model to test the effects of the intervention).
-4.  Evaluating the statistical properties of those models. For example,
-    the power of the design can be estimated by tracking the proportion
-    of times the model successfully detects the “true” intervention
-    effect specified in Step 1.
+1.  Specifying the rollout schedule, expected intervention effects, and
+    other sample characteristics (e.g., number of cohorts, sample size
+    of each cohort).
+2.  Simulating several datasets
+3.  Fitting a statistical model to each dataset
+4.  Evaluating the statistical properties (e.g., power) of those fitted
+    models.
 
-### Step 1: Specify the rollout schedule, expected effects, and sample characteristics
+The rollout package provides functions to help you with each of these
+steps.
+
+## Specifying rollout schedules and effects
 
 In this step, we specify the rollout schedule and expected effects of
 the intervention. For example, we might specify that the intervention
@@ -81,17 +79,20 @@ effect during the sustainment phase.
 phase_effects <- list(baseline = 0, intervention = 2, sustainment = 1)
 ```
 
-Lastly, we specify the number of cohorts and the number of subjects in
-each cohort. For example, we might specify that there are 12 cohorts,
-each with 100 subjects.
+## Simulating rollout sample data
+
+In addition to the rollout schedule and expected effects, we need to
+specify a few additional simulation parameters. For example, we might
+specify that our design is rolled out across 12 cohorts, each with 100
+subjects.
 
 ``` r
 n_cohorts <- 12
 subjects_per_cohort <- 100
 ```
 
-All of these specifications are then combined into a named list that is
-passed to the `simulate_rollout_samples()` function.
+Then, all of our these specifications are then combined into a named
+list that is passed to the `simulate_rollout_samples()` function.
 
 ``` r
 sim_params <- list(
@@ -102,9 +103,7 @@ sim_params <- list(
 )
 ```
 
-### Step 2: Simulate data consistent with the rollout schedule and expected effects
-
-In this step, we simulate several datasets consistent with the rollout
+Finally, we simulate several datasets consistent with the rollout
 schedule and expected effects. The `simulate_rollout_samples()` function
 generates a dataset with the specified number of cohorts and subjects
 per cohort, and adds columns for the phase, time, and outcome variables.
