@@ -88,7 +88,9 @@ assign_rollout_phases <- function(
         extend_first_phase = extend_first_phase,
         extend_last_phase = extend_last_phase
       )
-    )
+    ) |>
+    ungroup() |>
+    mutate(phase = factor(phase, levels = unique(phase)))
 
   .data <- .data |>
     dplyr::group_by(!!!initial_groups)
