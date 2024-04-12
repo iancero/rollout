@@ -22,7 +22,7 @@ different rollout study designs.
 ## Installation
 
 Rollout is under development and therefore not yet available on CRAN.
-However, you can install the development version of rollout via GitHub.
+However, you can install the development version via GitHub.
 
 ``` r
 devtools::install_github("iancero/rollout")
@@ -39,8 +39,8 @@ evaluating rollout designs.
 4.  Evaluating the statistical properties (e.g., power, bias) of those
     fitted models.
 
-Rollout’s functions are designed guide you through each of these steps,
-which are described in more detail below.
+Rollout’s main functions guide you through each of these steps and are
+described in more detail below.
 
 ## Specifying rollout schedules and effects
 
@@ -57,6 +57,8 @@ each lasting a different amount of time.[^1]
   longer applied, but data are still collected to evaluate whether the
   effects of the intervention persist beyond its initial application.
 
+### Phase schedules
+
 Specifying the **rollout schedule** in the rollout package is done by
 creating a named list of rollout **phase durations**. The names of the
 list elements correspond to the names of the phases, and the values
@@ -68,6 +70,8 @@ library(rollout)
 
 phase_durations <- list(baseline = 3, intervention = 2, sustainment = 4)
 ```
+
+### Phase effects
 
 **Phase effects** are specified in a similar way. For example, we might
 specify that the intervention has no effect during the baseline phase, a
@@ -98,7 +102,8 @@ sim_params <- list(
   phase_durations = phase_durations,
   phase_effects = phase_effects,
   cohorts = cohorts,
-  subjects_per_cohort = subjects_per_cohort)
+  subjects_per_cohort = subjects_per_cohort
+)
 ```
 
 Lastly, we simulate several datasets consistent with the rollout
@@ -108,6 +113,18 @@ per cohort, and adds columns for the phase, time, and outcome variables.
 
 ``` r
 simulated_samples_df <- simulate_rollout_samples(sim_params, n = 10)
+
+head(simulated_samples_df)
+#> # A tibble: 6 × 10
+#>   .cohort .time phase    .sample .subject phase_score cohort_score subject_score
+#>     <int> <int> <fct>      <int>    <int>       <dbl>        <dbl>         <dbl>
+#> 1       1     1 baseline       1        1           0       -0.560         0.401
+#> 2       1     1 baseline       1        2           0       -0.560         0.111
+#> 3       1     1 baseline       1        3           0       -0.560        -0.556
+#> 4       1     1 baseline       1        4           0       -0.560         1.79 
+#> 5       1     1 baseline       1        5           0       -0.560         0.498
+#> 6       1     1 baseline       1        6           0       -0.560        -1.97 
+#> # ℹ 2 more variables: error <dbl>, y <dbl>
 ```
 
 ## Fitting a statistical model
@@ -124,7 +141,18 @@ fitted_models <- fit_model(simulated_samples_df, model)
 #> Warning: There was 1 warning in `dplyr::mutate()`.
 #> ℹ In argument: `.fit = purrr::map(data, ~lmerTest::lmer(model, data = .x))`.
 #> Caused by warning in `checkConv()`:
-#> ! Model failed to converge with max|grad| = 0.00215223 (tol = 0.002, component 1)
+#> ! Model failed to converge with max|grad| = 0.00205116 (tol = 0.002, component 1)
+
+head(fitted_models)
+#> # A tibble: 6 × 3
+#>   .sample data                  .fit      
+#>     <int> <list>                <list>    
+#> 1       1 <tibble [10,800 × 9]> <lmrMdLmT>
+#> 2       2 <tibble [10,800 × 9]> <lmrMdLmT>
+#> 3       3 <tibble [10,800 × 9]> <lmrMdLmT>
+#> 4       4 <tibble [10,800 × 9]> <lmrMdLmT>
+#> 5       5 <tibble [10,800 × 9]> <lmrMdLmT>
+#> 6       6 <tibble [10,800 × 9]> <lmrMdLmT>
 ```
 
 ## Evaluating design properties
@@ -159,7 +187,38 @@ plot_schedule(rollout_params)
 
 ## Complex phase schedules
 
-## Custom phase effects
+In addition to straightforward phase schedules, the rollout package
+supports more complex phase schedules. For example, you can specify
+multiple interventions in a single phase to produce a head-to-head
+comparison trial.
+
+``` r
+phase_durations <- list(
+  baseline = 3,
+  interventions = list( # head-to-head interventions
+    intervetion_a = 3,
+    intervention_b = 1
+  ),
+  sustainment = 4
+)
+```
+
+## Complex phase effects
+
+The rollout package allows you to specify a custom function for each
+phase effect. This can be useful when the effect of the intervention is
+not constant over time, like an intervention that has a delayed effect
+or a time-varying effect.
+
+``` r
+phase_effects <- list(
+  baseline = 0,
+  intervention = function(phase_time) case_when(
+    phase_time < 3 ~ phase_time**2, # quadratic effect for rapid uptake
+    phase_time >= 3 ~ 2 # constant effect after 3 months
+  )
+)
+```
 
 ## Pipe-friendly framework
 
@@ -168,9 +227,9 @@ chain together multiple functions to simulate and evaluate rollout
 designs. The entire workflow can be written in a single pipe, like this:
 
 ``` r
-results <- sim_params |> 
-  simulate_rollout_samples(n = 10) |> 
-  fit_model(model) |> 
+results <- sim_params |>
+  simulate_rollout_samples(n = 10) |>
+  fit_model(model) |>
   eval_design(feature = "power")
 ```
 
@@ -199,9 +258,9 @@ setting the `future::plan()` options.
 ``` r
 future::plan(future::multisession, workers = 4)
 
-results <- sim_params |> 
-  sim_samples(n = 100) |> 
-  fit_models(model) |> 
+results <- sim_params |>
+  sim_samples(n = 100) |>
+  fit_models(model) |>
   eval_design(feature = c("power", "bias"))
 ```
 
@@ -214,12 +273,13 @@ can speed up simulations by stopping the simulation process early, if a
 given design statistic (e.g., power) has crossed a particilar threshold.
 
 ``` r
-results <- sim_params |> 
-  sim_samples(n = 100) |> 
-  fit_models(model) |> 
+results <- sim_params |>
+  sim_samples(n = 100) |>
+  fit_models(model) |>
   eval_design(
-    feature = c("power", "bias"), 
-    threshold = list(power = 0.8, p = 0.05))
+    feature = c("power", "bias"),
+    threshold = list(power = 0.8, p = 0.05)
+  )
 ```
 
 ## Progress bars
