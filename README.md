@@ -118,12 +118,12 @@ head(simulated_samples_df)
 #> # A tibble: 6 × 10
 #>   .cohort .time phase    .sample .subject phase_score cohort_score subject_score
 #>     <int> <int> <fct>      <int>    <int>       <dbl>        <dbl>         <dbl>
-#> 1       1     1 baseline       1        1           0       -0.560         0.401
-#> 2       1     1 baseline       1        2           0       -0.560         0.111
-#> 3       1     1 baseline       1        3           0       -0.560        -0.556
-#> 4       1     1 baseline       1        4           0       -0.560         1.79 
-#> 5       1     1 baseline       1        5           0       -0.560         0.498
-#> 6       1     1 baseline       1        6           0       -0.560        -1.97 
+#> 1       1     1 baseline       1        1           0        -1.21       -0.776 
+#> 2       1     1 baseline       1        2           0        -1.21        0.0645
+#> 3       1     1 baseline       1        3           0        -1.21        0.959 
+#> 4       1     1 baseline       1        4           0        -1.21       -0.110 
+#> 5       1     1 baseline       1        5           0        -1.21       -0.511 
+#> 6       1     1 baseline       1        6           0        -1.21       -0.911 
 #> # ℹ 2 more variables: error <dbl>, y <dbl>
 ```
 
@@ -138,10 +138,12 @@ and cohort, and random effects for the cohort and subject.
 model <- "y ~ phase + (1 | .cohort/.subject)"
 
 fitted_models <- fit_model(simulated_samples_df, model)
-#> Warning: There was 1 warning in `dplyr::mutate()`.
+#> Warning: There were 2 warnings in `dplyr::mutate()`.
+#> The first warning was:
 #> ℹ In argument: `.fit = purrr::map(data, ~lmerTest::lmer(model, data = .x))`.
 #> Caused by warning in `checkConv()`:
-#> ! Model failed to converge with max|grad| = 0.00205116 (tol = 0.002, component 1)
+#> ! Model failed to converge with max|grad| = 0.00244258 (tol = 0.002, component 1)
+#> ℹ Run `dplyr::last_dplyr_warnings()` to see the 1 remaining warning.
 
 head(fitted_models)
 #> # A tibble: 6 × 3
@@ -218,6 +220,30 @@ phase_effects <- list(
     phase_time >= 3 ~ 2 # constant effect after 3 months
   )
 )
+```
+
+## Matrix / data.frame phase specification
+
+The rollout package allows you to specify phase effects as a matrix or
+data.frame. This can be useful when you have a large number of phases
+and effects to specify, or when your phase schedule involves some
+nuance.
+
+``` r
+cohorts <- 4
+time_steps <- 6
+
+phase_schedule <- diag(nrow = cohorts, ncol = time_steps)
+phase_schedule[upper.tri(phase_schedule)] <- 1
+
+phase_schedule[1, 4:6] <- 0 # revert back to baseline for first cohort only
+
+phase_schedule
+#>      [,1] [,2] [,3] [,4] [,5] [,6]
+#> [1,]    1    1    1    0    0    0
+#> [2,]    0    1    1    1    1    1
+#> [3,]    0    0    1    1    1    1
+#> [4,]    0    0    0    1    1    1
 ```
 
 ## Pipe-friendly framework
