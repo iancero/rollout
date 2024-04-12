@@ -126,9 +126,7 @@ The rollout package includes a number of advanced features to help you simulate 
 ## Visualization
 
 ```{r, eval=FALSE}
-library(ggplot2)
-
-plot_schedule(rollout_params)
+# TODO: implement plotting of schedules
 ```
 
 
