@@ -12,8 +12,8 @@ extract_phase_block <- function(phase, block) {
 
 extract_block_schedule <- function(phase_durs, block) {
   phase_durs |>
-    map(~ extract_phase_block(.x, block)) |>
-    flatten()
+    purrr::map(~ extract_phase_block(.x, block)) |>
+    purrr::flatten()
 }
 
 phase_interval_num <- function(time, transition_times) {
@@ -80,7 +80,7 @@ assign_rollout_phases <- function(
     dplyr::mutate(
       phase = cur_phase(
         time = {{ time }},
-        cohort = cur_group_id(),
+        cohort = dplyr::cur_group_id(),
         block = {{ block }},
         step_dur = step_dur,
         phase_durs = phase_durs,
@@ -89,8 +89,8 @@ assign_rollout_phases <- function(
         extend_last_phase = extend_last_phase
       )
     ) |>
-    ungroup() |>
-    mutate(phase = factor(phase, levels = unique(phase)))
+    dplyr::ungroup() |>
+    dplyr::mutate(phase = factor(phase, levels = unique(phase)))
 
   .data <- .data |>
     dplyr::group_by(!!!initial_groups)
