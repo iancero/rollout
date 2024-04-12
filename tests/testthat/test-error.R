@@ -1,19 +1,21 @@
 test_that("sim_normal_error works", {
+  df <- data.frame(x = 1:10)
+
   expect_equal(
-    mtcars |>
+    df |>
       sim_normal_error() |>
-      dplyr::pull(.error) |>
-      length(),
-    nrow(mtcars)
+      nrow(),
+    nrow(df)
   )
 })
 
 test_that("sim_normal_error works with custom sd", {
+  df <- data.frame(x = 1:10)
+
   expect_equal(
-    mtcars |>
+    df |>
       sim_normal_error(sd = 2) |>
-      dplyr::pull(.error) |>
-      length(),
-    nrow(mtcars)
+      nrow(),
+    nrow(df)
   )
 })
