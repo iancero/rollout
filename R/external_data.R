@@ -42,60 +42,7 @@ pivot_schedule_longer <- function(schedule, time_cols,
   schedule
 }
 
-# join_unit_info <- function(long_schedule, unit_info, by = NULL, uncount_unit = NULL, .id = NULL){
-#   schedule <- long_schedule |>
-#     dplyr::left_join(unit_info, by = by)
-#
-#   if(!is.null(uncount_unit)){
-#
-#     print(schedule)
-#
-#     schedule <- schedule |>
-#       tidyr::uncount(weights = !!rlang::ensym(uncount_unit))
-#   }
-#
-#   schedule
-# }
 
-# join_unit_info <- function(long_schedule, unit_info, by = NULL, uncount_unit = NULL, .id = NULL){
-#   schedule <- long_schedule |>
-#     dplyr::left_join(unit_info, by = by)
-#
-#   print("Columns in schedule after join:")
-#   print(names(schedule))
-#
-#   if(!is.null(uncount_unit)){
-#     print("uncount_unit:")
-#     print(uncount_unit)
-#
-#     uncount_unit_sym <- ensym(uncount_unit)
-#     print("uncount_unit_sym:")
-#     print(uncount_unit_sym)
-#
-#     print("Head of schedule:")
-#     print(head(schedule))
-#
-#     schedule <- schedule |>
-#       tidyr::uncount(weights = !!uncount_unit_sym)
-#   }
-#   schedule
-# }
-
-# join_unit_info <- function(long_schedule, unit_info, by = NULL, uncount_unit = NULL, .id = NULL){
-#   schedule <- long_schedule |>
-#     dplyr::left_join(unit_info, by = by)
-#
-#   print("Columns in schedule after join:")
-#   print(names(schedule))
-#
-#   if(!is.null(uncount_unit)){
-#     print(paste("Uncounting by:", uncount_unit))
-#
-#     schedule <- schedule |>
-#       tidyr::uncount(weights = .data[[uncount_unit]])
-#   }
-#   schedule
-# }
 
 
 join_unit_info <- function(long_schedule, unit_info, by = NULL, uncount_unit = NULL, .id = NULL){
@@ -117,13 +64,6 @@ initialize_replicates <- function(long_schedule, n){
     tidyr::expand_grid(sim_sample = seq(n)) |>
     dplyr::select(sim_sample, everything())
 }
-
-
-# simulate_unbalanced_units <- function(design_df, var_name, var_fn){
-#   design_df |>
-#     dplyr::mutate("{{var_name}}" := var_fn) |>
-#     tidyr::uncount({{var_name}}, .id = var_name)
-# }
 
 simulate_random_unit <- function(design_df, ...) {
   # Capture the dots
