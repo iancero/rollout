@@ -22,6 +22,7 @@ set.seed(1234)
 [![CRAN status](https://www.r-pkg.org/badges/version/rollout)](https://CRAN.R-project.org/package=rollout)
 [![R-CMD-check](https://github.com/iancero/rollout/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iancero/rollout/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/iancero/rollout/branch/main/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout?branch=main)
+[![Codecov test coverage](https://codecov.io/gh/iancero/rollout/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout)
 <!-- badges: end -->
 
 A **rollout trial** involves "rolling out" an intervention across different sites or groups in incremental phases. The **rollout package** simulates and evaluates statistical properties (e.g., power) of different rollout study designs.
