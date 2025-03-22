@@ -21,7 +21,6 @@ set.seed(1234)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN status](https://www.r-pkg.org/badges/version/rollout)](https://CRAN.R-project.org/package=rollout)
 [![R-CMD-check](https://github.com/iancero/rollout/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iancero/rollout/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/iancero/rollout/branch/main/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout?branch=main)
 [![Codecov test coverage](https://codecov.io/gh/iancero/rollout/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout)
 <!-- badges: end -->
 
