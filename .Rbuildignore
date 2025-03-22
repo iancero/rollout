@@ -9,3 +9,5 @@
 ^docs$
 ^pkgdown$
 ^practice\.Rmd$
+^development_background_assets$
+^practice\.qmd$
