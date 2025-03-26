@@ -24,5 +24,62 @@ set.seed(1234)
 [![Codecov test coverage](https://codecov.io/gh/iancero/rollout/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout)
 <!-- badges: end -->
 
+## Basic Example
+
+We begin with a basic example to estimate the power of a ROIO trial, in which the investigators are actively trying to improve the effectiveness of an intervention over the course of a trial, with information gleaned from early cohorts informing changes made to the process for later cohorts.
+
+We start by creating a design dataframe that describes the units of the trial.
+
+```{r}
+# library(tidyverse)
+
+# cohort | site | observation | chron_time | local_time | condition
+
+cohorts <- letters[1:6]
+sites <- rpois(n = length(cohorts), lambda = 3)
+units <- rpois(n = sum(sites), lambda = 3)
+
+# there must be at least one site per cohort
+# there must be at least one unit per site
+
+gen_design_df = function (cohorts, sites, units) {
+  assertthat::assert_that(length(cohorts) > 0)
+  assertthat::assert_that(all(sites > 0))
+  assertthat::assert_that(all(units > 0))
+  
+  assertthat::assert_that(length(cohorts) == length(sites))
+  assertthat::assert_that(sum(sites) == length(units))
+
+  dplyr::tibble(cohort = cohorts, n_sites = sites) |> 
+    tidyr::uncount(n_sites, .id = "site") |> 
+    dplyr::mutate(n_units = units) |> 
+    tidyr::uncount(n_units, .id = "unit")
+}
+
+
+gen_design_df(cohorts, sites, units)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
