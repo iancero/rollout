@@ -1,3 +1,4 @@
+#' @export
 add_fixed_effect <- function(design_df, ...) {
   dots <- rlang::enquos(...)
 
@@ -12,6 +13,7 @@ add_fixed_effect <- function(design_df, ...) {
     dplyr::mutate(!!var_name := !!var_expr)
 }
 
+#' @export
 add_random_effect <- function(design_df, ..., .nesting = NULL) {
   dots <- rlang::enquos(...)
 
@@ -46,6 +48,7 @@ add_random_effect <- function(design_df, ..., .nesting = NULL) {
   design_df
 }
 
+#' @export
 add_error <- function(.data, variance = 1) {
   # Save original grouping
   original_groups <- dplyr::group_vars(.data)
@@ -63,6 +66,7 @@ add_error <- function(.data, variance = 1) {
   .data
 }
 
+#' @export
 add_linear_outcome <- function(data, output_col = "y_linear") {
   dot_cols <- names(data)[startsWith(names(data), ".")]
 
@@ -74,6 +78,7 @@ add_linear_outcome <- function(data, output_col = "y_linear") {
     dplyr::mutate(!!output_col := rowSums(dplyr::pick(all_of(dot_cols))))
 }
 
+#' @export
 add_binary_outcome <- function(data,
                                linear_col = "y_linear",
                                prob_col = "y_prob",
@@ -93,6 +98,7 @@ add_binary_outcome <- function(data,
     )
 }
 
+#' @export
 add_poisson_outcome <- function(data,
                                 linear_col = "y_linear",
                                 rate_col = "y_rate",

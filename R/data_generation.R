@@ -14,7 +14,7 @@ multiply = function (a, b) {
 
 
 
-
+#' @export
 pivot_schedule_longer <- function(schedule,
                                   time_cols,
                                   names_to = "chron_time",
@@ -49,6 +49,7 @@ pivot_schedule_longer <- function(schedule,
   schedule
 }
 
+#' @export
 join_info <- function(long_schedule, unit_info, by = NULL,
                       uncount_vars = NULL, .ids = NULL) {
 
@@ -81,7 +82,7 @@ join_info <- function(long_schedule, unit_info, by = NULL,
   schedule
 }
 
-
+#' @export
 initialize_replicates <- function(long_schedule, n) {
   long_schedule |>
     tidyr::expand_grid(sample_id = seq(n)) |>
