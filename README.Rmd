@@ -50,6 +50,8 @@ rollout_schedule <- tribble(
 This allows the user maximum control over what can become a complex process of scheduling, responding to real world pragmatic constraints. But in this format, it is not yet convenient for simulation, so `rollout` offers the utility function `pivot_schedule_longer()`.
 
 ```{r}
+library(rollout)
+
 rollout_design <- rollout_schedule |> 
   pivot_schedule_longer(t1:t5)
 
@@ -149,6 +151,16 @@ simulated_trials <- simulated_trials |>
   add_error(variance = .25)
 ```
 
+### Outcome variables
+
+We can add three different types of outcome variables: linear, binary (logistic), and Poisson. Unlike the effects above, these at NOT automatically prepended with "." because they are observed values - rather than effects, they are data. Additionally, both the binary and Poisson functions return multiple columns, including the final observed output column (i.e., the simulated binary outcome) and the associated input columns that were involved in producing it (i.e., y_linear, y_prob).
+
+```{r}
+simulated_trials <- simulated_trials |>
+  add_binary_outcome()
+
+head(simulated_trials)
+```
 
 
 
