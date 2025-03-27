@@ -62,15 +62,15 @@ Now that the data are in this format, the user is prepared to incoporate any sit
 
 ```{r}
 site_info <- tribble(
-  ~site, ~readiness, ~classes_per_time, ~members_per_class,
-  "001",    6,          11,                23,
-  "002",    7,          15,                25,
-  "003",    6,          11,                22,
-  "004",    9,          12,                16,
-  "005",    7,          11,                24,
-  "006",    2,          9,                 22,
-  "007",    2,          9,                 16,
-  "008",    7,          14,                25,
+  ~site, ~admin_readiness, ~classes_per_time, ~members_per_class,
+  "001",    6,                11,                23,
+  "002",    7,                15,                25,
+  "003",    6,                11,                22,
+  "004",    9,                12,                16,
+  "005",    7,                11,                24,
+  "006",    2,                9,                 22,
+  "007",    2,                9,                 16,
+  "008",    7,                14,                25,
 )
 ```
 
@@ -138,8 +138,15 @@ simulated_trials <- simulated_trials |>
 
 head(simulated_trials)
 ```
+Again, underneath the hood, this is a wrapper to some dplyr functions applying a groupby-mutate-ungroup pattern. However, it is slightly more complicated because it will intercept the existing group structure of the incoming dataframe (e.g., if group_by has been called before), store it, calculate the random effect according to the nesting structure (if specified), then regroup the dataframe exactly as it was before the function. If no nesting structure is specified, this function will simply rely on the grouping structure given to it in the incoming dataframe.
+
+#### Error variance
 
 Finally, the simplest effect to add is random error, which is simple enough to specify with just a variance.
+
+```{r}
+
+```
 
 
 
