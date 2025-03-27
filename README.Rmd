@@ -25,7 +25,7 @@ set.seed(1234)
 <!-- badges: end -->
 
 
-# Basic Example
+## Basic Example
 
 We begin with a basic example of the most widely known rollout trial format: a stepped wedge trial. In such a trial, sites are randomly assigned to cohorts. Then, these cohorts are assigned to receive the intervention beginning at different times. Data are recorded for the duration of the study, both before (baseline condition) and after the initiation of an intervention condition. 
 
@@ -79,7 +79,7 @@ And then link them to our design dataframe. We can do this with a simple left_jo
 
 ```{r}
 rollout_design <- rollout_design |> 
-  join_unit_info(
+  join_info(
     site_info,
     by = "site",
     uncount_vars = c("classes_per_time", "members_per_class"),
@@ -95,11 +95,23 @@ simulated_trials <- rollout_design |>
 head(simulated_trials)
 ```
 
+### Simulating effects
 
+To start, let's add an intervention effect that gives an immediate boost in individual-level outcomes, followed by slow further improvement. We'll also add an effect representing a potential confound - a global improvement in the overall population (what an economist might call a "secular trend").
 
+```{r}
+simulated_trials <- simulated_trials |>
+  add_fixed_effect(
+    condition = case_when(
+      condition == "bsln" ~ 0,
+      condition == "intv" ~ .50 + .10*local_time)) |> 
+  add_fixed_effect(
+    popwide_decline = .10*chron_time)
 
+head(simulated_trials)
+```
 
-
+Underneath the hood, `add_fixed_effect()` is a thin wrapper around `mutate()` that does a few things: first, it limits the number of variables that can be created in a single call to exactly one named argument. This admittedly creates some redundant work for the user, who now has to call `add_fixed_effect()` multiple times, but comes with the advantage of forcing more readable code for these designs. All effect generation functions (more on these below) in `rollout` follow this convention. Second, they pre-pend all effect variables with a "`.`" to make it obvious which variables in the `simulated_trials` dataframe are data and which are effects that will eventually be used in the generation of an outcome variable. In this way, the user can focus on data that they want the effect to be associated with, rather than keeping variable names straight. It also facilitates the creation of an outcome creation function, which can automatically search for effects in `simulated_trials` and aggregate them into an outcome.
 
 
 
