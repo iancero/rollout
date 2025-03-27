@@ -47,7 +47,18 @@ add_random_effect <- function(design_df, ..., .nesting = NULL) {
 }
 
 add_error <- function(.data, variance = 1) {
-  .data %>%
+  # Save original grouping
+  original_groups <- dplyr::group_vars(.data)
+
+  .data <- .data %>%
     dplyr::ungroup() %>%
     dplyr::mutate(.error = rnorm(n(), sd = sqrt(variance)))
+
+  # Restore original grouping
+  if (length(original_groups) > 0) {
+    .data <- .data %>%
+      dplyr::group_by(dplyr::across(all_of(original_groups)))
+  }
+
+  .data
 }
