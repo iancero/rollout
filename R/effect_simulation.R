@@ -63,7 +63,7 @@ add_error <- function(.data, variance = 1) {
   .data
 }
 
-add_linear_outcome <- function(data, output_col = ".y_linear") {
+add_linear_outcome <- function(data, output_col = "y_linear") {
   dot_cols <- names(data)[startsWith(names(data), ".")]
 
   if (length(dot_cols) == 0) {
@@ -75,9 +75,9 @@ add_linear_outcome <- function(data, output_col = ".y_linear") {
 }
 
 add_binary_outcome <- function(data,
-                                 linear_col = ".y_linear",
-                                 prob_col = ".y_prob",
-                                 binary_col = ".y_bin") {
+                               linear_col = "y_linear",
+                               prob_col = "y_prob",
+                               binary_col = "y_bin") {
 
   dot_cols <- names(data)[startsWith(names(data), ".")]
 
@@ -94,9 +94,9 @@ add_binary_outcome <- function(data,
 }
 
 add_poisson_outcome <- function(data,
-                                linear_col = ".y_linear",
-                                rate_col = ".y_rate",
-                                count_col = ".y_count") {
+                                linear_col = "y_linear",
+                                rate_col = "y_rate",
+                                count_col = "y_count") {
 
   dot_cols <- names(data)[startsWith(names(data), ".")]
   if (length(dot_cols) == 0) stop("No effect columns found.")
@@ -108,6 +108,7 @@ add_poisson_outcome <- function(data,
       !!count_col := rpois(dplyr::n(), lambda = .data[[rate_col]])
     )
 }
+
 
 
 
