@@ -24,6 +24,42 @@ set.seed(1234)
 [![Codecov test coverage](https://codecov.io/gh/iancero/rollout/graph/badge.svg)](https://app.codecov.io/gh/iancero/rollout)
 <!-- badges: end -->
 
+
+# Basic Example
+
+We begin with a basic example of the most widely known rollout trial format: a stepped wedge trial. In such a trial, sites are randomly assigned to cohorts. Then, these cohorts are assigned to receive the intervention beginning at different times. Data are recorded for the duration of the study, both before (baseline condition) and after the initiation of an intervention condition. 
+
+In `rollout`, simulating such a trial begins with a matrix specification of the cohorts and their transition points, like so.
+
+```{r}
+rollout_schedule <- tibble::tribble(
+  ~cohort, ~site, ~t1,    ~t2,    ~t3,    ~t4,    ~t5,
+  "c1",    "001", "bsln", "intv", "intv", "intv", "intv",
+  "c1",    "002", "bsln", "intv", "intv", "intv", "intv",
+  "c2",    "003", "bsln", "bsln", "intv", "intv", "intv",
+  "c2",    "004", "bsln", "bsln", "intv", "intv", "intv",
+  "c3",    "005", "bsln", "bsln", "bsln", "intv", "intv",
+  "c3",    "006", "bsln", "bsln", "bsln", "intv", "intv",
+  "c4",    "007", "bsln", "bsln", "bsln", "bsln", "intv",
+  "c4",    "008", "bsln", "bsln", "bsln", "bsln", "intv"
+)
+```
+
+This allows the user maximum control over what can become a complex process of scheduling, responding to real world pragmatic constraints. But in this format, it is not yet convenient for simulation, so `rollout` offers the utility function `pivot_schedule_longer()`.
+
+```{r}
+rollout_design <- rollout_schedule |> 
+  pivot_schedule_longer(t1:t5, local_time = TRUE, local_time_int = 0)
+
+head(rollout_design)
+```
+
+In addition to performing a wide-to-long pivot on our schedule, this function has also computed two time columns: chron_time and local_time (0-indexed, to make cohort-specific effects easier to program). It has also constructed a condition column of all the conditions.
+
+Now that the data are in this format, the user is prepared to incoporate any site-level background information they might have. For example, as part of pre-trial assessment and coordination with the study sites, a user might have access to site-level information, like the self-reported readiness to receive the intervention at the site. number 
+
+
+
 ## Basic Example
 
 We begin with a basic example to estimate the power of a ROIO trial, in which the investigators are actively trying to improve the effectiveness of an intervention over the course of a trial, with information gleaned from early cohorts informing changes made to the process for later cohorts.
@@ -36,25 +72,13 @@ We start by creating a design dataframe that describes the units of the trial.
 # cohort | site | observation | chron_time | local_time | condition
 
 cohorts <- letters[1:6]
-sites <- rpois(n = length(cohorts), lambda = 3)
-units <- rpois(n = sum(sites), lambda = 3)
+sites <- rpois(n = length(cohorts), lambda = 3) + 1
+units <- rpois(n = sum(sites), lambda = 3) + 1 
 
 # there must be at least one site per cohort
 # there must be at least one unit per site
 
-gen_design_df = function (cohorts, sites, units) {
-  assertthat::assert_that(length(cohorts) > 0)
-  assertthat::assert_that(all(sites > 0))
-  assertthat::assert_that(all(units > 0))
-  
-  assertthat::assert_that(length(cohorts) == length(sites))
-  assertthat::assert_that(sum(sites) == length(units))
 
-  dplyr::tibble(cohort = cohorts, n_sites = sites) |> 
-    tidyr::uncount(n_sites, .id = "site") |> 
-    dplyr::mutate(n_units = units) |> 
-    tidyr::uncount(n_units, .id = "unit")
-}
 
 
 gen_design_df(cohorts, sites, units)
