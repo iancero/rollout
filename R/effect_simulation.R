@@ -22,13 +22,25 @@ add_random_effect <- function(design_df, ..., .nesting = NULL) {
   var_name <- paste0(".", names(dots)[1])
   var_expr <- dots[[1]]
 
-  # Group if .nesting is provided
+  # Save original grouping
+  original_groups <- dplyr::group_vars(design_df)
+
+  # Apply nesting groups temporarily (if any)
   if (!is.null(.nesting)) {
     design_df <- design_df %>%
       dplyr::group_by(dplyr::across(all_of(.nesting)))
   }
 
-  design_df %>%
-    dplyr::mutate(!!var_name := !!var_expr) %>%
-    dplyr::ungroup()
+  # Add random effect and restore original grouping
+  design_df <- design_df %>%
+    dplyr::mutate(!!var_name := !!var_expr)
+
+  if (length(original_groups) > 0) {
+    design_df <- design_df %>%
+      dplyr::group_by(dplyr::across(all_of(original_groups)))
+  } else {
+    design_df <- design_df %>% dplyr::ungroup()
+  }
+
+  design_df
 }
