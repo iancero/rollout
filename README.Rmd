@@ -145,7 +145,8 @@ Again, underneath the hood, this is a wrapper to some dplyr functions applying a
 Finally, the simplest effect to add is random error, which is simple enough to specify with just a variance.
 
 ```{r}
-
+simulated_trials <- simulated_trials |>
+  add_error(variance = .25)
 ```
 
 
