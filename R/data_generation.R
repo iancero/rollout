@@ -82,6 +82,13 @@ join_info <- function(long_schedule, unit_info, by = NULL,
 }
 
 
+initialize_replicates <- function(long_schedule, n) {
+  long_schedule |>
+    tidyr::expand_grid(sample_id = seq(n)) |>
+    dplyr::select(sample_id, dplyr::everything())
+}
+
+
 
 
 
