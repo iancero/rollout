@@ -17,7 +17,7 @@ multiply = function (a, b) {
 
 pivot_schedule_longer <- function(schedule,
                                   time_cols,
-                                  names_to = "time",
+                                  names_to = "chron_time",
                                   names_pattern = ".*(\\d+)",
                                   names_transform = as.numeric,
                                   values_to = "condition",
