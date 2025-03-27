@@ -23,8 +23,7 @@ pivot_schedule_longer <- function(schedule,
                                   values_to = "condition",
                                   values_transform = as.factor,
                                   cohort_name = cohort,
-                                  local_time = TRUE,
-                                  local_time_int = 0) {
+                                  local_time = TRUE) {
 
   schedule <- schedule |>
     tidyr::pivot_longer(
@@ -39,12 +38,19 @@ pivot_schedule_longer <- function(schedule,
   if (local_time) {
     cohort_name_char <- rlang::as_name(rlang::enquo(cohort_name))
 
+    print(schedule)
+
     schedule <- schedule |>
-      dplyr::group_by({{ cohort_name }}) |>
-      dplyr::mutate(local_time = .data[[names_to]] - min(.data[[names_to]]) + local_time_int) |>
+      dplyr::group_by({{ cohort_name }}, condition) |>
+      dplyr::mutate(local_time = row_number() - 1) |>
       dplyr::ungroup()
   }
 
   schedule
 }
+
+
+
+
+
 
