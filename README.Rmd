@@ -32,7 +32,9 @@ We begin with a basic example of the most widely known rollout trial format: a s
 In `rollout`, simulating such a trial begins with a matrix specification of the cohorts and their transition points, like so.
 
 ```{r}
-rollout_schedule <- tibble::tribble(
+library(tidyverse)
+
+rollout_schedule <- tribble(
   ~cohort, ~site, ~t1,    ~t2,    ~t3,    ~t4,    ~t5,
   "c1",    "001", "bsln", "intv", "intv", "intv", "intv",
   "c1",    "002", "bsln", "intv", "intv", "intv", "intv",
@@ -49,46 +51,49 @@ This allows the user maximum control over what can become a complex process of s
 
 ```{r}
 rollout_design <- rollout_schedule |> 
-  pivot_schedule_longer(t1:t5, local_time = TRUE, local_time_int = 0)
+  pivot_schedule_longer(t1:t5)
 
 head(rollout_design)
 ```
 
 In addition to performing a wide-to-long pivot on our schedule, this function has also computed two time columns: chron_time and local_time (0-indexed, to make cohort-specific effects easier to program). It has also constructed a condition column of all the conditions.
 
-Now that the data are in this format, the user is prepared to incoporate any site-level background information they might have. For example, as part of pre-trial assessment and coordination with the study sites, a user might have access to site-level information, like the self-reported readiness to receive the intervention at the site. number 
-
-
-
-## Basic Example
-
-We begin with a basic example to estimate the power of a ROIO trial, in which the investigators are actively trying to improve the effectiveness of an intervention over the course of a trial, with information gleaned from early cohorts informing changes made to the process for later cohorts.
-
-We start by creating a design dataframe that describes the units of the trial.
+Now that the data are in this format, the user is prepared to incoporate any site-level background information they might have. For example, as part of pre-trial assessment and coordination with the study sites, a user might have access to site-level information, like the self-reported readiness to receive the intervention at the site, as well as the relative population of observational units at the site (e.g., classes per timepoint, servicemembers per class). For simplicity, we imagine some of these data below.
 
 ```{r}
-# library(tidyverse)
-
-# cohort | site | observation | chron_time | local_time | condition
-
-cohorts <- letters[1:6]
-sites <- rpois(n = length(cohorts), lambda = 3) + 1
-units <- rpois(n = sum(sites), lambda = 3) + 1 
-
-# there must be at least one site per cohort
-# there must be at least one unit per site
-
-
-
-
-gen_design_df(cohorts, sites, units)
+site_info <- tribble(
+  ~site, ~readiness, ~classes_per_time, ~members_per_class,
+  "001",    6,          11,                23,
+  "002",    7,          15,                25,
+  "003",    6,          11,                22,
+  "004",    9,          12,                16,
+  "005",    7,          11,                24,
+  "006",    2,          9,                 22,
+  "007",    2,          9,                 16,
+  "008",    7,          14,                25,
+)
 ```
 
+And then link them to our design dataframe. We can do this with a simple left_join(), but we are stuck with the fact that two of our columns are actually counts of observational units (in fact, nested units), which will need to be expanded too. Anticipating this is a common situation, `rollout` has its own helper function for joining and expanding such site-related information:
 
 
+```{r}
+rollout_design <- rollout_design |> 
+  join_unit_info(
+    site_info,
+    by = "site",
+    uncount_vars = c("classes_per_time", "members_per_class"),
+    .ids = c("class", "member")
+  )
+```
+With our design fully expanded, we now need to initialize several replicates of this same dataset for later simulation of data.
 
+```{r}
+simulated_trials <- rollout_design |> 
+  initialize_replicates(n = 100)
 
-
+head(simulated_trials)
+```
 
 
 
