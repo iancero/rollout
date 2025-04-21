@@ -1,19 +1,3 @@
-#' Title
-#'
-#' @param a the first number
-#' @param b the second number
-#'
-#' @returns the product
-#' @export
-#'
-#' @examples
-#' multiply(2, 2)
-multiply = function (a, b) {
-  a * b
-}
-
-
-
 #' @export
 pivot_schedule_longer <- function(schedule,
                                   time_cols,
@@ -87,6 +71,14 @@ initialize_replicates <- function(long_schedule, n) {
   long_schedule |>
     tidyr::expand_grid(sample_id = seq(n)) |>
     dplyr::select(sample_id, dplyr::everything())
+}
+
+add_parameter <- function(.data, ...)
+
+  dots <- rlang::enquos(...)
+
+  .data %>%
+    dplyr::mutate(!!dots)
 }
 
 
