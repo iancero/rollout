@@ -73,13 +73,19 @@ initialize_replicates <- function(long_schedule, n) {
     dplyr::select(sample_id, dplyr::everything())
 }
 
-add_parameter <- function(.data, ...)
-
+#' @export
+add_parameter <- function(df, ...) {
   dots <- rlang::enquos(...)
 
-  .data %>%
-    dplyr::mutate(!!dots)
+  # Evaluate expressions in the calling environment
+  evaluated <- purrr::imap(dots, ~ rlang::eval_tidy(.x))
+
+  df |>
+    tidyr::expand_grid(!!!evaluated)
 }
+
+
+
 
 
 
