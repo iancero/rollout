@@ -60,6 +60,17 @@ head(rollout_design)
 
 In addition to performing a wide-to-long pivot on our schedule, this function has also computed two time columns: chron_time and local_time (0-indexed, to make cohort-specific effects easier to program). It has also constructed a condition column of all the conditions.
 
+We can also add parameter combinations we might be interested in evaluating
+
+```{r}
+rollout_design <- rollout_design |> 
+  add_parameter(
+    inst_intv_effect = c(.10, .20, .30),
+    intv_slope = c(.30, .40, .50)
+  )
+```
+
+
 Now that the data are in this format, the user is prepared to incoporate any site-level background information they might have. For example, as part of pre-trial assessment and coordination with the study sites, a user might have access to site-level information, like the self-reported readiness to receive the intervention at the site, as well as the relative population of observational units at the site (e.g., classes per timepoint, servicemembers per class). For simplicity, we imagine some of these data below.
 
 ```{r}
@@ -89,27 +100,11 @@ rollout_design <- rollout_design |>
   )
 ```
 
-```{r}
-# TODO: add parameter combination step to design df process
-
-rollout_design <- rollout_design |> 
-  add_params(
-    
-  )
-  expand_grid(
-    effect_size = c(.10, .20, .30),
-    sample_size = c(1000, 2000, 3000)
-  )
-
-```
-
-
-
 With our design fully expanded, we now need to initialize several replicates of this same dataset for later simulation of data.
 
 ```{r}
 simulated_trials <- rollout_design |> 
-  initialize_replicates(n = 100)
+  initialize_replicates(n = 10)
 
 head(simulated_trials)
 ```
@@ -129,7 +124,7 @@ simulated_trials <- simulated_trials |>
   add_fixed_effect(
     condition = case_when(
       condition == "bsln" ~ 0,
-      condition == "intv" ~ .50 + effect_size*local_time)) |> 
+      condition == "intv" ~ inst_intv_effect + intv_slope*local_time)) |> 
   add_fixed_effect(
     popwide_decline = .10*chron_time)
 
@@ -140,18 +135,6 @@ toc()
 head(simulated_trials)
 ```
 
-```{r}
-simulated_trials |>
-  add_fixed_effect(
-    .condition = case_when(
-      condition == "bsln" ~ 0,
-      condition == "intv" ~ .50 + my_params*local_time),
-    .x
-    )
-
-```
-
-
 Underneath the hood, `add_fixed_effect()` is a thin wrapper around `mutate()` that does a few things: first, it limits the number of variables that can be created in a single call to exactly one named argument. This admittedly creates some redundant work for the user, who now has to call `add_fixed_effect()` multiple times, but comes with the advantage of forcing more readable code for these designs. All effect generation functions (more on these below) in `rollout` follow this convention. Second, they pre-pend all effect variables with a "`.`" to make it obvious which variables in the `simulated_trials` dataframe are data and which are effects that will eventually be used in the generation of an outcome variable. In this way, the user can focus on data that they want the effect to be associated with, rather than keeping variable names straight. It also facilitates the creation of an outcome creation function, which can automatically search for effects in `simulated_trials` and aggregate them into an outcome.
 
 #### Random effects
@@ -159,9 +142,14 @@ Underneath the hood, `add_fixed_effect()` is a thin wrapper around `mutate()` th
 Random effects are simulated similarly to fixed effects, except that it is sometimes important to take nesting structure into account. For example, to create a class-level random intercept, we need to specify that classes are nested within sites and cohorts, like so:
 
 ```{r}
+my_factor <- factor(1:3, labels = letters[1:3])
+
+sample(my_factor, size = 1, replace = TRUE)
+
+
 simulated_trials <- simulated_trials |>
   add_random_effect(
-    instructor_experience = rnorm(n = 1, mean = 0, sd = .30),
+    instructor_experience = rnorm(n = 1, mean = 0, sd = .30), # rpois, 
     .nesting = c("cohort", "site", "class"))
 
 head(simulated_trials)
@@ -199,307 +187,70 @@ simulated_trials <- simulated_trials |>
 head(simulated_trials)
 ```
 
-
 ```{r}
-# fit_models_parallel <- function(data, .x, .f, ...) {
-#   # Set up parallel backend
-#   future::plan(future::multisession)
-#   
-#   # Get column name as string from the tidyselect-style input
-#   col_name <- rlang::as_name(rlang::enquo(.x))
-#   
-#   # Get the number of datasets
-#   n_datasets <- nrow(data)
-#   
-#   # Set up progress reporting
-#   progressr::handlers(progressr::handler_progress(
-#     format = "[:bar] :percent :eta",
-#     clear = FALSE
-#   ))
-#   
-#   # Create a quosure of the formula function
-#   formula_fn <- rlang::enquo(.f)
-#   
-#   # Apply the model function to each dataset with progress
-#   progressr::with_progress({
-#     # Create a progressor function
-#     p <- progressr::progressor(steps = n_datasets)
-#     
-#     result <- data %>%
-#       dplyr::mutate(model = furrr::future_map(
-#         .x = .data[[col_name]],
-#         .f = function(d) {
-#           # Apply the formula function
-#           model_result <- rlang::eval_tidy(formula_fn, list(.x = d))
-#           # Update progress
-#           p()
-#           # Return result
-#           return(model_result)
-#         },
-#         ...
-#       ))
-#   })
-#   
-#   # Return the updated dataframe with models
-#   return(result)
-# }
-# 
-# fit_models_parallel <- function(data, .x, .f, ...) {
-#   # Set up parallel backend
-#   future::plan(future::multisession)
-#   
-#   # Get column name as string from the tidyselect-style input
-#   col_name <- rlang::as_name(rlang::enquo(.x))
-#   
-#   # Get the number of datasets
-#   n_datasets <- nrow(data)
-#   
-#   # Set up progress reporting
-#   progressr::handlers(progressr::handler_progress(
-#     format = "[:bar] :percent :eta",
-#     clear = FALSE
-#   ))
-#   
-#   # Get the actual function from the formula
-#   model_fn <- rlang::as_function(rlang::enquo(.f))
-#   
-#   # Apply the model function to each dataset with progress
-#   progressr::with_progress({
-#     # Create a progressor function
-#     p <- progressr::progressor(steps = n_datasets)
-#     
-#     result <- data %>%
-#       dplyr::mutate(model = furrr::future_map(
-#         .x = .data[[col_name]],
-#         .f = function(d) {
-#           # Apply the function to the dataset
-#           model_result <- model_fn(d)
-#           # Update progress
-#           p()
-#           # Return result
-#           return(model_result)
-#         },
-#         ...
-#       ))
-#   })
-#   
-#   # Return the updated dataframe with models
-#   return(result)
-# }
-# 
-# nested_trials <- simulated_trials |> 
-#   group_by(sample_id) |> 
-#   nest() |> 
-#   ungroup() |> 
-#   slice(1:10) |> 
-#   fit_models_parallel(
-#     .x = data,
-#     .f = ~lmer(y_linear ~ condition + (1 | cohort), data = .x)
-#   )
-```
-
-
-```{r}
-# library(tidyverse)
-# library(furrr)
-# 
-# plan(multisession)
-# 
-# # Simulated nested data
-# nested_data <- tibble(
-#   id = 1:3,
-#   data = map(id, ~ tibble(x = rnorm(100), y = rnorm(100)))
-# )
-# 
-# # Fit model inline
-# nested_data <- nested_data %>%
-#   mutate(model = future_map(data, ~ lm(y ~ x, data = .x)))
-# 
-# # Check result
-# summary(nested_data$model[[1]])
-
-```
-
-```{r}
-# fit_models <- function(.data, .x, .f, ...) {
-#   x_quo <- rlang::enquo(.x)
-#   f_fn  <- rlang::as_function(.f)
-# 
-#   dplyr::mutate(.data, model = furrr::future_map(!!x_quo, f_fn, ...))
-# }
-
-# 
-# fit_models <- function(.data, .x, .f, ..., .progress = FALSE) {
-#   x_quo <- rlang::enquo(.x)
-#   f_fn  <- rlang::as_function(.f)
-# 
-#   dplyr::mutate(
-#     .data,
-#     model = furrr::future_map(!!x_quo, f_fn, ..., .progress = .progress)
-#   )
-# }
-
-# fit_models <- function(.data, .x, .f, ..., .progress = FALSE) {
-#   x_quo <- rlang::enquo(.x)
-#   f_fn  <- rlang::as_function(.f)
-# 
-#   if (.progress) {
-#     progressr::with_progress({
-#       dplyr::mutate(
-#         .data,
-#         model = furrr::future_map(!!x_quo, f_fn, ..., .progress = TRUE)
-#       )
-#     })
-#   } else {
-#     dplyr::mutate(
-#       .data,
-#       model = furrr::future_map(!!x_quo, f_fn, ..., .progress = FALSE)
-#     )
-#   }
-# }
-
-
-fit_models <- function(.data, .x, .f, ..., .progress = FALSE) {
-  x_quo <- rlang::enquo(.x)
-  f_fn  <- rlang::as_function(.f)
-
-  run_map <- function() {
-    dplyr::mutate(
-      .data,
-      model = furrr::future_map(!!x_quo, f_fn, ..., .progress = .progress)
-    )
-  }
-
-  if (.progress) {
-    progressr::with_progress(run_map())
-  } else {
-    run_map()
-  }
-}
-
-
-
-
-# # ---------
-# 
-# future::plan(future::multisession)
-# 
-# progressr::handlers(progressr::handler_txtprogressbar)
-# 
-# 
-# nested_data <- tibble::tibble(
-#   id = 1:1000,
-#   data = purrr::map(1:1000, ~ tibble::tibble(x = rnorm(100), y = rnorm(100)))
-# )
-# 
-# nested_data <- fit_models(
-#   nested_data,
-#   .x = data,
-#   .f = ~ lm(y ~ x, data = .x),
-#   .progress = TRUE
-# )
-# 
-# summary(nested_data$model[[1]])
-
-
-```
-
-```{r}
-# future::plan(future::multisession)
-# progressr::handlers(progressr::handler_rstudio)
-# 
-# 
-# nested_data <- tibble::tibble(
-#   id = 1:1000,
-#   data = purrr::map(1:1000, ~ tibble::tibble(x = rnorm(100), y = rnorm(100)))
-# )
-# 
-# progressr::with_progress({
-#   nested_data2 <- furrr::future_map(
-#     nested_data$data,
-#     ~ lm(y ~ x, data = .x),
-#     .progress = TRUE
-#   )
-# })
-
-```
-
-```{r}
-# future::plan(future::multisession)
-# progressr::handlers(progressr::handler_rstudio)  # for RStudio
-# 
-# x <- 1:100
-# 
-# progressr::with_progress({
-#   y <- furrr::future_map(x, ~ Sys.sleep(0.01), .progress = TRUE)
-# })
-# 
-# ```
-# ```{r}
-# progressr::handlers(progressr::handler_rstudio)  # once per session
-# future::plan(future::multisession)
-# 
-# progressr::with_progress({
-#   nested_data <- fit_models(
-#     nested_data,
-#     .x = data,
-#     .f = ~ lm(y ~ x, data = .x),
-#     .progress = TRUE
-#   )
-# })
-
-```
-
-
-```{r}
-# progressr::handlers(progressr::handler_rstudio)  # once per session
-# future::plan(future::multisession)
-# 
-# progressr::with_progress({
-#   nested_data <- fit_models(
-#     nested_data,
-#     .x = data,
-#     .f = ~ lm(y ~ x, data = .x),
-#     .progress = TRUE
-#   )
-# })
-```
-
-
-
-```{r}
-fit_models <- function(.data, .x, .f, ..., .progress = TRUE, .col = "model") {
-  x_quo <- rlang::enquo(.x)
-  f_fn  <- rlang::as_function(.f)
-  input_list <- rlang::eval_tidy(x_quo, .data)
-
-  # Choose parallel backend
-  is_windows <- .Platform$OS.type == "windows"
-  cores <- max(1L, parallel::detectCores() - 1L)
-
-  # Parallel apply with progress bar
-  if (is_windows) {
-    cl <- parallel::makeCluster(cores)
-    on.exit(parallel::stopCluster(cl), add = TRUE)
-
-    result <- pbapply::pblapply(input_list, f_fn, ..., cl = cl)
-  } else {
-    options(mc.cores = cores)
-    result <- pbapply::pblapply(input_list, f_fn, ...)
-  }
-
-  # Add result column
-  dplyr::mutate(.data, !!.col := result)
-}
-
-library(pbapply)
-library(parallel)
-library(tibble)
-library(purrr)
-library(dplyr)
-library(rlang)
 library(tidyverse)
+library(lme4)
 
+
+nested_data <- simulated_trials |> 
+  group_by(sample_id, intv_slope, inst_intv_effect) |> 
+  nest()
+
+
+my_model_f <- function(df) {
+  glmer(
+    formula = y_bin ~ condition * local_time + (1 | cohort/class/member),
+    data = df
+  )
+}
+
+nested_models <- nested_data[, 1:3] |> 
+  fit_models(
+    .x = data,
+    .f = my_model_f,
+    .packages = c("lme4"))
+
+
+```
+
+```{r}
+library(lme4)
+
+test_fun <- function(df) {
+  glmer(
+    y_bin ~ condition * local_time + (1 | cohort/class/member),
+    data = df
+  )
+}
+
+library(parallel)
+library(pbapply)
+
+cl <- makeCluster(2)
+clusterEvalQ(cl, {
+  library(lme4)
+})
+
+# export the test data and function
+clusterExport(cl, varlist = c("nested_data", "test_fun"))
+
+# run one model
+pbapply::pblapply(nested_data$data[1], test_fun, cl = cl)
+
+```
+```{r}
+fit_models(
+  .data = nested_data[, 1:3],
+  .x = data,
+  .f = function(df) 1,
+  .packages = c("lme4")  # still required to keep setup identical
+)
+
+```
+
+
+
+```{r}
 # example data
 nested_data <- tibble(
   id = 1:1000,
@@ -531,46 +282,38 @@ nested_data |>
 
 
 
-```{r}
-nested_data 
-```
-
 
 ```{r}
-summarize_models = function (.data, model_col = 'model') {
-  .data |> 
+summarize_models = function (.data, effect = NULL, model_col = 'model') {
+
+  original_groups <- dplyr::group_vars(.data)
+  
+  .data <- .data |> 
     mutate(model_results = map(.data[[model_col]], tidy)) |> 
     unnest(model_results) |> 
-    filter(term == 'x') |> 
+    
+  if (!is.null(effect)){
+    .data <- .data |> 
+      filter(term %in% effect)
+  }
+  
+  .data |> 
+    dplyr::group_by(c(original_groups, effect)) |> 
     summarize(power = mean(p.value < .05))
 }
 
 nested_data |> 
-  summarize_models()
+  group_by(inst_intv_effect, intv_slope) |> 
+  summarize_models(
+    .effect = c('condition', 'chron_time'),
+    .model_col = 'model'
+  )
 ```
 
 
 
 
 ## Fitting models
-
-```{r}
-# Define fit function separately
-my_fit <- function(df) lm(y_linear ~ condition, data = df)
-
-nested_trials <- simulated_trials |> 
-  group_by(sample_id) |> 
-  nest() 
-
-# Run the model fitting
-setup_progress()
-fit_models(nested_trials, fit_fun = my_fit, .parallel = FALSE)
-
-```
-
-```{r}
-str(simulated_trials$data[[1]])
-```
 
 
 
