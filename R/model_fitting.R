@@ -1,77 +1,71 @@
-#' @export
-fit_models_old <- function(.data, .x, .f, ..., .progress = TRUE, .col = "model") {
-  x_quo <- rlang::enquo(.x)
-  f_fn  <- rlang::as_function(.f)
-  input_list <- rlang::eval_tidy(x_quo, .data)
-
-  # Choose parallel backend
-  is_windows <- .Platform$OS.type == "windows"
-  cores <- max(1L, parallel::detectCores() - 1L)
-
-  # Parallel apply with progress bar
-  if (is_windows) {
-    cl <- parallel::makeCluster(cores)
-    on.exit(parallel::stopCluster(cl), add = TRUE)
-
-    result <- pbapply::pblapply(input_list, f_fn, ..., cl = cl)
-  } else {
-    options(mc.cores = cores)
-    result <- pbapply::pblapply(input_list, f_fn, ...)
-  }
-
-  # Add result column
-  .data |>
-    dplyr::mutate(!!.col := result)
-}
-
-#' @export
-# fit_models <- function(.data, .x, .f, ..., .progress = TRUE, .col = "model", .packages) {
-#   x_quo <- rlang::enquo(.x)
-#   f_fn  <- rlang::as_function(.f)
-#   input_list <- rlang::eval_tidy(x_quo, .data)
-#
-#   is_windows <- .Platform$OS.type == "windows"
-#   cores <- max(1L, parallel::detectCores() - 1L)
-#
-#   if (missing(.packages) || length(.packages) == 0) {
-#     stop("You must explicitly provide the .packages argument, e.g., .packages = c(\"lme4\").")
-#   }
-#
-#   if (is_windows) {
-#     cl <- parallel::makeCluster(cores)
-#     on.exit(parallel::stopCluster(cl), add = TRUE)
-#
-#     # Make .packages available inside the workers
-#     parallel::clusterExport(cl, varlist = ".packages", envir = environment())
-#
-#     # Set working directory (optional but often helpful)
-#     # parallel::clusterEvalQ(cl, setwd(getwd()))
-#
-#     # Load packages
-#     parallel::clusterEvalQ(cl, {
-#       for (pkg in .packages) {
-#         suppressPackageStartupMessages(library(pkg, character.only = TRUE))
-#       }
-#       NULL
-#     })
-#
-#     result <- pbapply::pblapply(input_list, f_fn, ..., cl = cl)
-#   } else {
-#     options(mc.cores = cores)
-#
-#     lapply(.packages, function(pkg) {
-#       suppressPackageStartupMessages(library(pkg, character.only = TRUE))
-#     })
-#
-#     result <- pbapply::pblapply(input_list, f_fn, ...)
-#   }
-#
-#   .data |>
-#     dplyr::mutate(!!.col := result)
-# }
-
-
-
+#' Fit models in parallel across a list-column of datasets
+#'
+#' Applies a user-specified model-fitting function to each element of a list-column
+#' of datasets in `.data`, fitting models in parallel with a progress bar, and returns
+#' the original data frame with a new `model` column containing the fitted models.
+#'
+#' @param .data A data frame containing a list-column of datasets to which the model
+#' function will be applied.
+#' @param .x Unquoted column name of the list-column containing the datasets.
+#' @param .f A function or formula to apply to each dataset to fit the desired model
+#' (e.g., `~ lm(y ~ x, data = .)` or `~ lme4::lmer(y ~ x + (x | group), data = .)`).
+#' @param packages A character vector of package names to load on each parallel worker,
+#' if your model-fitting function requires additional packages. Defaults to `NULL`.
+#' @param n_cores Number of cores to use for parallel processing.
+#' Defaults to `parallel::detectCores() - 1`.
+#'
+#' @return The original `.data` data frame with an additional `model` column containing
+#' the fitted model objects returned by `.f`.
+#'
+#' @details
+#' This function is intended for use in simulation pipelines where multiple datasets
+#' are generated (e.g., via `simulate_datasets()`), and models need to be fitted to
+#' each dataset efficiently in parallel.
+#'
+#' It uses `pbapply::pblapply()` to provide a progress bar during model fitting,
+#' and `parallel::makeCluster()` for multi-core processing.
+#'
+#' Packages specified in `packages` will be loaded on each worker to ensure model-fitting
+#' functions that depend on those packages work correctly in parallel.
+#'
+#' @examples
+#' library(dplyr)
+#' library(purrr)
+#' library(lme4)
+#'
+#' # Create example grouped datasets for mixed models
+#' datasets <- tibble(
+#'   id = 1:5,
+#'   data = map(1:5, ~ {
+#'     df <- sleepstudy[sample(nrow(sleepstudy), 50, replace = TRUE), ]
+#'     df$Subject <- factor(df$Subject)
+#'     df
+#'   })
+#' )
+#'
+#' # Fit linear mixed models in parallel
+#' fitted_models <- fit_models(
+#'   datasets,
+#'   .x = data,
+#'   .f = ~ lme4::lmer(Reaction ~ Days + (Days | Subject), data = .),
+#'   packages = c("lme4")
+#' )
+#'
+#' # Inspect the first fitted mixed model
+#' summary(fitted_models$model[[1]])
+#'
+#' # Tidy the fitted models using extract_model_results() for further evaluation
+#' extracted <- extract_model_results(fitted_models)
+#' head(extracted)
+#'
+#' # Summarise estimates for 'Days' across simulated fits
+#' extracted |>
+#'   filter(term == "Days") |>
+#'   evaluate_model_results(
+#'     mean_estimate = mean(estimate, na.rm = TRUE),
+#'     sd_estimate = sd(estimate, na.rm = TRUE)
+#'   )
+#'
 #' @export
 fit_models <- function(.data, .x, .f, packages = NULL,
                        n_cores = parallel::detectCores() - 1) {
@@ -100,5 +94,3 @@ fit_models <- function(.data, .x, .f, packages = NULL,
   .data$model <- models
   .data
 }
-
-
