@@ -48,8 +48,6 @@ pivot_schedule_longer <- function(schedule,
   if (local_time) {
     cohort_name_char <- rlang::as_name(rlang::enquo(cohort_name))
 
-    print(schedule)
-
     schedule <- schedule |>
       dplyr::group_by({{ cohort_name }}, condition) |>
       dplyr::mutate(local_time = row_number() - 1) |>
