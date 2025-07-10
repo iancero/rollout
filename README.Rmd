@@ -140,3 +140,92 @@ design_df |> head()
 ```
 
 
+## Initializing Replicates
+
+After adding simulation parameters, we expand our design to include **replicates**. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.
+
+Here, we initialize **10 replicates** to keep memory usage manageable for demonstration. (In practice, you may use 100+ replicates for stable power estimation.)
+
+```{r initialize-replicates}
+design_df <- design_df |>
+  initialize_replicates(n = 10)
+
+# Preview structure with replicate IDs
+design_df |> head()
+```
+
+## Simulating Outcomes
+
+We now simulate the outcome data according to our specified design. This prepares the dataset for model fitting, power estimation, and bias evaluation.
+
+---
+
+### Adding a Fixed Time Trend
+
+First, we add a **small negative time trend** (`b_time = -0.05`) to represent gradual improvement over time, independent of intervention.
+
+```{r add-time-trend}
+design_df <- design_df |>
+  add_parameter(b_time = -0.05)
+```
+
+### Adding Fixed Effects
+
+Next, we add fixed effects for:
+- The intervention effect, applied when `condition == "intv"`.
+- The time trend, scaled by `chron_time`.
+
+```{r add-intv-effect}
+design_df <- design_df |>
+  add_fixed_effect(
+    intv_effect = b_intv * as.numeric(condition == "intv"),
+    time_trend = b_time * chron_time
+  )
+```
+
+
+### Adding Random Intercepts for Sites
+
+We add a random intercept at the site level to simulate between-site variability.
+
+```{r add-random-intercept}
+design_df <- design_df |>
+  add_random_effect(
+    site_intercept = rnorm(1, mean = 0, sd = sigma_site),
+    .nesting = "site"
+  )
+```
+
+### Adding Unit-Level Residual Error
+
+We add unit-level residual error with variance `sigma_unit^2`.
+
+```{r add-random-error}
+design_df <- design_df |>
+  add_error(variance = sigma_unit^2)
+```
+
+### Generating the Linear Outcome
+
+Finally, we generate a linear outcome (y_linear) by summing all fixed, random, and error components.
+
+```{r add-linear-y-outcome}
+design_df <- design_df |>
+  add_linear_outcome(output_col = "y_linear")
+
+# Preview simulated data
+design_df |> head()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
