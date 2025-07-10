@@ -51,207 +51,27 @@
 <!-- badges: start -->
 
 <div class="section level2">
-<h2 id="basic-example">Basic Example<a class="anchor" aria-label="anchor" href="#basic-example"></a>
+<h2 id="introduction-simulating-a-rollout-trial">Introduction: Simulating a Rollout Trial<a class="anchor" aria-label="anchor" href="#introduction-simulating-a-rollout-trial"></a>
 </h2>
-<p>We begin with a basic example of the most widely known rollout trial format: a stepped wedge trial. In such a trial, sites are randomly assigned to cohorts. Then, these cohorts are assigned to receive the intervention beginning at different times. Data are recorded for the duration of the study, both before (baseline condition) and after the initiation of an intervention condition.</p>
-<p>In <code>rollout</code>, simulating such a trial begins with a matrix specification of the cohorts and their transition points, like so.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──</span></span>
-<span><span class="co">#&gt; ✔ dplyr     1.1.4     ✔ readr     2.1.5</span></span>
-<span><span class="co">#&gt; ✔ forcats   1.0.0     ✔ stringr   1.5.1</span></span>
-<span><span class="co">#&gt; ✔ ggplot2   3.5.1     ✔ tibble    3.2.1</span></span>
-<span><span class="co">#&gt; ✔ lubridate 1.9.3     ✔ tidyr     1.3.1</span></span>
-<span><span class="co">#&gt; ✔ purrr     1.0.2     </span></span>
-<span><span class="co">#&gt; ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
-<span><span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span></span>
-<span><span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span></span>
-<span><span class="co">#&gt; ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</span></span>
-<span></span>
-<span><span class="va">rollout_schedule</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
-<span>  <span class="op">~</span><span class="va">cohort</span>, <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">t1</span>,    <span class="op">~</span><span class="va">t2</span>,    <span class="op">~</span><span class="va">t3</span>,    <span class="op">~</span><span class="va">t4</span>,    <span class="op">~</span><span class="va">t5</span>,</span>
-<span>  <span class="st">"c1"</span>,    <span class="st">"001"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c1"</span>,    <span class="st">"002"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c2"</span>,    <span class="st">"003"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c2"</span>,    <span class="st">"004"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c3"</span>,    <span class="st">"005"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c3"</span>,    <span class="st">"006"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c4"</span>,    <span class="st">"007"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span>,</span>
-<span>  <span class="st">"c4"</span>,    <span class="st">"008"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"bsln"</span>, <span class="st">"intv"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>This allows the user maximum control over what can become a complex process of scheduling, responding to real world pragmatic constraints. But in this format, it is not yet convenient for simulation, so <code>rollout</code> offers the utility function <code><a href="reference/pivot_schedule_longer.html">pivot_schedule_longer()</a></code>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iancero/rollout" class="external-link">rollout</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rollout_design</span> <span class="op">&lt;-</span> <span class="va">rollout_schedule</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/pivot_schedule_longer.html">pivot_schedule_longer</a></span><span class="op">(</span><span class="va">t1</span><span class="op">:</span><span class="va">t5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 40 × 4</span></span>
-<span><span class="co">#&gt;    cohort site  chron_time condition</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;    </span></span>
-<span><span class="co">#&gt;  1 c1     001            1 bsln     </span></span>
-<span><span class="co">#&gt;  2 c1     001            2 intv     </span></span>
-<span><span class="co">#&gt;  3 c1     001            3 intv     </span></span>
-<span><span class="co">#&gt;  4 c1     001            4 intv     </span></span>
-<span><span class="co">#&gt;  5 c1     001            5 intv     </span></span>
-<span><span class="co">#&gt;  6 c1     002            1 bsln     </span></span>
-<span><span class="co">#&gt;  7 c1     002            2 intv     </span></span>
-<span><span class="co">#&gt;  8 c1     002            3 intv     </span></span>
-<span><span class="co">#&gt;  9 c1     002            4 intv     </span></span>
-<span><span class="co">#&gt; 10 c1     002            5 intv     </span></span>
-<span><span class="co">#&gt; # ℹ 30 more rows</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rollout_design</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 5</span></span>
-<span><span class="co">#&gt;   cohort site  chron_time condition local_time</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 c1     001            1 bsln               0</span></span>
-<span><span class="co">#&gt; 2 c1     001            2 intv               0</span></span>
-<span><span class="co">#&gt; 3 c1     001            3 intv               1</span></span>
-<span><span class="co">#&gt; 4 c1     001            4 intv               2</span></span>
-<span><span class="co">#&gt; 5 c1     001            5 intv               3</span></span>
-<span><span class="co">#&gt; 6 c1     002            1 bsln               1</span></span></code></pre></div>
-<p>In addition to performing a wide-to-long pivot on our schedule, this function has also computed two time columns: chron_time and local_time (0-indexed, to make cohort-specific effects easier to program). It has also constructed a condition column of all the conditions.</p>
-<p>Now that the data are in this format, the user is prepared to incoporate any site-level background information they might have. For example, as part of pre-trial assessment and coordination with the study sites, a user might have access to site-level information, like the self-reported readiness to receive the intervention at the site, as well as the relative population of observational units at the site (e.g., classes per timepoint, servicemembers per class). For simplicity, we imagine some of these data below.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">site_info</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
-<span>  <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">admin_readiness</span>, <span class="op">~</span><span class="va">classes_per_time</span>, <span class="op">~</span><span class="va">members_per_class</span>,</span>
-<span>  <span class="st">"001"</span>,    <span class="fl">6</span>,                <span class="fl">11</span>,                <span class="fl">23</span>,</span>
-<span>  <span class="st">"002"</span>,    <span class="fl">7</span>,                <span class="fl">15</span>,                <span class="fl">25</span>,</span>
-<span>  <span class="st">"003"</span>,    <span class="fl">6</span>,                <span class="fl">11</span>,                <span class="fl">22</span>,</span>
-<span>  <span class="st">"004"</span>,    <span class="fl">9</span>,                <span class="fl">12</span>,                <span class="fl">16</span>,</span>
-<span>  <span class="st">"005"</span>,    <span class="fl">7</span>,                <span class="fl">11</span>,                <span class="fl">24</span>,</span>
-<span>  <span class="st">"006"</span>,    <span class="fl">2</span>,                <span class="fl">9</span>,                 <span class="fl">22</span>,</span>
-<span>  <span class="st">"007"</span>,    <span class="fl">2</span>,                <span class="fl">9</span>,                 <span class="fl">16</span>,</span>
-<span>  <span class="st">"008"</span>,    <span class="fl">7</span>,                <span class="fl">14</span>,                <span class="fl">25</span>,</span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>And then link them to our design dataframe. We can do this with a simple left_join(), but we are stuck with the fact that two of our columns are actually counts of observational units (in fact, nested units), which will need to be expanded too. Anticipating this is a common situation, <code>rollout</code> has its own helper function for joining and expanding such site-related information:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rollout_design</span> <span class="op">&lt;-</span> <span class="va">rollout_design</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/join_info.html">join_info</a></span><span class="op">(</span></span>
-<span>    <span class="va">site_info</span>,</span>
-<span>    by <span class="op">=</span> <span class="st">"site"</span>,</span>
-<span>    uncount_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"classes_per_time"</span>, <span class="st">"members_per_class"</span><span class="op">)</span>,</span>
-<span>    .ids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"class"</span>, <span class="st">"member"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p>With our design fully expanded, we now need to initialize several replicates of this same dataset for later simulation of data.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">rollout_design</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/initialize_replicates.html">initialize_replicates</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 9</span></span>
-<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time admin_readiness class</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;           &lt;dbl&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1         1 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 2         2 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 3         3 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 4         4 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 5         5 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 6         6 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; # ℹ 1 more variable: member &lt;int&gt;</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="simulating-effects">Simulating effects<a class="anchor" aria-label="anchor" href="#simulating-effects"></a>
-</h3>
-<div class="section level4">
-<h4 id="fixed-effects">Fixed effects<a class="anchor" aria-label="anchor" href="#fixed-effects"></a>
-</h4>
-<p>To start, let’s add an intervention effect that gives an immediate boost in individual-level outcomes, followed by slow further improvement. We’ll also add an effect representing a potential confound - a global improvement in the overall population (what an economist might call a “secular trend”).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
-<span>    condition <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
-<span>      <span class="va">condition</span> <span class="op">==</span> <span class="st">"bsln"</span> <span class="op">~</span> <span class="fl">0</span>,</span>
-<span>      <span class="va">condition</span> <span class="op">==</span> <span class="st">"intv"</span> <span class="op">~</span> <span class="fl">.50</span> <span class="op">+</span> <span class="fl">.10</span><span class="op">*</span><span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
-<span>    popwide_decline <span class="op">=</span> <span class="fl">.10</span><span class="op">*</span><span class="va">chron_time</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 11</span></span>
-<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time admin_readiness class</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;           &lt;dbl&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1         1 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 2         2 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 3         3 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 4         4 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 5         5 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 6         6 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; # ℹ 3 more variables: member &lt;int&gt;, .condition &lt;dbl&gt;, .popwide_decline &lt;dbl&gt;</span></span></code></pre></div>
-<p>Underneath the hood, <code><a href="reference/add_fixed_effect.html">add_fixed_effect()</a></code> is a thin wrapper around <code>mutate()</code> that does a few things: first, it limits the number of variables that can be created in a single call to exactly one named argument. This admittedly creates some redundant work for the user, who now has to call <code><a href="reference/add_fixed_effect.html">add_fixed_effect()</a></code> multiple times, but comes with the advantage of forcing more readable code for these designs. All effect generation functions (more on these below) in <code>rollout</code> follow this convention. Second, they pre-pend all effect variables with a “<code>.</code>” to make it obvious which variables in the <code>simulated_trials</code> dataframe are data and which are effects that will eventually be used in the generation of an outcome variable. In this way, the user can focus on data that they want the effect to be associated with, rather than keeping variable names straight. It also facilitates the creation of an outcome creation function, which can automatically search for effects in <code>simulated_trials</code> and aggregate them into an outcome.</p>
-</div>
-<div class="section level4">
-<h4 id="random-effects">Random effects<a class="anchor" aria-label="anchor" href="#random-effects"></a>
-</h4>
-<p>Random effects are simulated similarly to fixed effects, except that it is sometimes important to take nesting structure into account. For example, to create a class-level random intercept, we need to specify that classes are nested within sites and cohorts, like so:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/add_random_effect.html">add_random_effect</a></span><span class="op">(</span></span>
-<span>    instructor_experience <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">.30</span><span class="op">)</span>,</span>
-<span>    .nesting <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cohort"</span>, <span class="st">"site"</span>, <span class="st">"class"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 12</span></span>
-<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time admin_readiness class</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;           &lt;dbl&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1         1 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 2         2 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 3         3 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 4         4 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 5         5 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 6         6 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; # ℹ 4 more variables: member &lt;int&gt;, .condition &lt;dbl&gt;, .popwide_decline &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   .instructor_experience &lt;dbl&gt;</span></span></code></pre></div>
-<p>As another example in this trial, it might also be important for even instances of a given class to share variance because they have overlapping students.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/add_random_effect.html">add_random_effect</a></span><span class="op">(</span></span>
-<span>    student_cohesion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">.20</span><span class="op">)</span>,</span>
-<span>    .nesting <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cohort"</span>, <span class="st">"site"</span>, <span class="st">"class"</span>, <span class="st">"local_time"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 13</span></span>
-<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time admin_readiness class</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;           &lt;dbl&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1         1 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 2         2 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 3         3 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 4         4 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 5         5 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 6         6 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; # ℹ 5 more variables: member &lt;int&gt;, .condition &lt;dbl&gt;, .popwide_decline &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   .instructor_experience &lt;dbl&gt;, .student_cohesion &lt;dbl&gt;</span></span></code></pre></div>
-<p>Again, underneath the hood, this is a wrapper to some dplyr functions applying a groupby-mutate-ungroup pattern. However, it is slightly more complicated because it will intercept the existing group structure of the incoming dataframe (e.g., if group_by has been called before), store it, calculate the random effect according to the nesting structure (if specified), then regroup the dataframe exactly as it was before the function. If no nesting structure is specified, this function will simply rely on the grouping structure given to it in the incoming dataframe.</p>
-</div>
-<div class="section level4">
-<h4 id="error-variance">Error variance<a class="anchor" aria-label="anchor" href="#error-variance"></a>
-</h4>
-<p>Finally, the simplest effect to add is random error, which is simple enough to specify with just a variance.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/add_error.html">add_error</a></span><span class="op">(</span>variance <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level3">
-<h3 id="outcome-variables">Outcome variables<a class="anchor" aria-label="anchor" href="#outcome-variables"></a>
-</h3>
-<p>We can add three different types of outcome variables: linear, binary (logistic), and Poisson. Unlike the effects above, these at NOT automatically prepended with “.” because they are observed values - rather than effects, they are data. Additionally, both the binary and Poisson functions return multiple columns, including the final observed output column (i.e., the simulated binary outcome) and the associated input columns that were involved in producing it (i.e., y_linear, y_prob).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/add_binary_outcome.html">add_binary_outcome</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 17</span></span>
-<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time admin_readiness class</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;           &lt;dbl&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1         1 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 2         2 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 3         3 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 4         4 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 5         5 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; 6         6 c1     001            1 bsln               0               6     1</span></span>
-<span><span class="co">#&gt; # ℹ 9 more variables: member &lt;int&gt;, .condition &lt;dbl&gt;, .popwide_decline &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   .instructor_experience &lt;dbl&gt;, .student_cohesion &lt;dbl&gt;, .error &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   y_linear &lt;dbl&gt;, y_prob &lt;dbl&gt;, y_bin &lt;int&gt;</span></span></code></pre></div>
-</div>
+<p>Rollout trials, including stepped wedge and sequential rollout designs, allow staggered implementation of interventions across sites while collecting outcome data over time. These designs are increasingly used in implementation science because they balance practical, ethical, and statistical considerations when rolling out interventions in real-world settings.</p>
+<p>The <code>rollout</code> R package supports the design and analysis of rollout trials using simulation-based methods. This tutorial demonstrates how to simulate, analyze, and estimate power for a stepped wedge trial with multiple sites per cohort. The workflow aligns with the following structure:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Define the rollout schedule</strong> across sites and cohorts.</li>
+<li>
+<strong>Join unit-level information</strong> such as the number of participants per site.</li>
+<li>
+<strong>Specify simulation parameters</strong> for intervention effects and variance components.</li>
+<li>
+<strong>Simulate outcomes</strong> under the specified design.</li>
+<li>
+<strong>Fit models</strong> across multiple simulated replicates.</li>
+<li>
+<strong>Evaluate bias and power</strong> of the planned design.</li>
+<li>
+<strong>Visualize results</strong> to inform design decisions.</li>
+</ol>
+<p>By following this pipeline, you can efficiently evaluate and optimize your rollout trial design before conducting your study.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
