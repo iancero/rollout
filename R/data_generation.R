@@ -90,7 +90,9 @@ join_info <- function(long_schedule, unit_info, by = NULL,
 
     # .ids gives optional new column names for each uncount level
     if (is.null(.ids)) {
-      .ids <- rep(NA_character_, length(uncount_vars))
+      .ids <- uncount_vars |>
+        as.character() |>
+        paste0("_id")
     }
 
     for (i in seq_along(uncount_vars)) {
