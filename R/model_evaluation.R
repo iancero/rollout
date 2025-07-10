@@ -33,7 +33,6 @@
 #' extract_model_results(sim_models, .term = "wt")
 #'
 #' @export
-
 extract_model_results <- function(
     models,
     model_col = model,
@@ -53,41 +52,6 @@ extract_model_results <- function(
 
   results
 }
-
-#' @export
-evaluate_model_results <- function(
-    results,
-    alpha = 0.05,
-    ...,
-    .summarise_standard_broom = FALSE,
-    broom_cols = c("estimate", "std.error", "statistic", "df", "p.value")
-) {
-  summary_exprs <- rlang::enquos(...)
-
-  results |>
-    dplyr::summarise(
-      n_models = dplyr::n(),
-      power = dplyr::if_else(
-        condition = all(is.na(p.value)),
-        true = NA_real_,
-        false = mean(p.value < alpha, na.rm = TRUE)),
-      !!!summary_exprs,
-      !!!{
-        if (.summarise_standard_broom) {
-          rlang::exprs(
-            dplyr::across(
-              dplyr::all_of(intersect(broom_cols, names(results))),
-              list(mean = mean, sd = sd),
-              .names = "{fn}_{col}"
-            )
-          )
-        } else {
-          rlang::exprs()
-        }
-      }
-    )
-}
-
 
 
 #' Summarise simulation results from extracted model estimates
