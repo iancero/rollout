@@ -41,5 +41,102 @@ The `rollout` R package supports the design and analysis of rollout trials using
 
 By following this pipeline, you can efficiently evaluate and optimize your rollout trial design before conducting your study.
 
+## Setup and Package Loading
+
+We begin by loading the required packages and setting a seed for reproducibility. Throughout this tutorial, we will use the `tidyverse` for data manipulation and plotting, and the `rollout` package for design, simulation, and evaluation of rollout trials.
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(rollout)
+
+set.seed(1234)  # for reproducibility
+```
+
+## Defining the Rollout Schedule
+
+We will simulate a **stepped wedge rollout trial** with:
+
+- **4 cohorts**
+- **8 sites total** (2 per cohort)
+- **8 timepoints**
+- Each cohort transitions to the intervention (`"intv"`) at a different time while data are collected continuously.
+
+We use a `tribble()` for clarity, then convert to long format using `pivot_schedule_longer()`.
+
+```{r define-schedule}
+# Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints
+rollout_schedule <- tribble(
+  ~cohort, ~site, ~t1, ~t2, ~t3, ~t4, ~t5, ~t6, ~t7, ~t8,
+       1,    "A",  "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv",
+       1,    "B",  "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv",
+       2,    "C",  "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv", "intv",
+       2,    "D",  "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv", "intv",
+       3,    "E",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
+       3,    "F",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
+       4,    "G",  "ctrl", "ctrl", "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv",
+       4,    "H",  "ctrl", "ctrl", "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv"
+)
+
+# Transform to long format for simulation
+long_schedule <- rollout_schedule |>
+  pivot_schedule_longer(time_cols = starts_with("t"))
+
+# Preview structure
+long_schedule |> head()
+```
+
+## Adding Unit-Level Information
+
+Next, we specify the **unit-level information** for each site, which is sometimes available in advance of a trial. For this example, each site will have a **slightly different number of units**, reflecting real-world differences in site sizes.
+
+We will then join this information to our long-format rollout schedule using `join_info()`. This will expand the dataset to include a row for each unit at each timepoint.
+
+```{r unit-info}
+# Create unit-level information with variable site sizes
+unit_info <- tribble(
+  ~site, ~n_units,
+   "A",   18,
+   "B",   22,
+   "C",   20,
+   "D",   19,
+   "E",   21,
+   "F",   20,
+   "G",   23,
+   "H",   17
+)
+
+# Join unit-level info to the long-format schedule
+design_df <- join_info(
+  long_schedule,
+  unit_info = unit_info,
+  by = "site",
+  uncount_vars = "n_units",
+  .ids = "unit_id"
+)
+
+# Preview the expanded design
+design_df |> head()
+```
+
+
+## Adding Simulation Parameters
+
+We will now add **simulation parameters** to our design. A key advantage of `rollout` is the ability to expand a parameter grid, enabling the evaluation of **multiple scenarios** within the same simulation pipeline.
+
+In this example:
+- We will evaluate **two intervention effect sizes** (`b_intv = 0.2` for a small effect, `b_intv = 0.5` for a moderate effect).
+- We will specify a constant **site-level standard deviation (`sigma_site = 0.5`)** and **unit-level residual standard deviation (`sigma_unit = 1`)**.
+
+```{r add-parameters}
+design_df <- design_df |>
+  add_parameter(
+    b_intv = c(0.2, 0.5),
+    sigma_site = 0.5,
+    sigma_unit = 1
+  )
+
+# Preview to confirm parameter expansion
+design_df |> head()
+```
 
 
