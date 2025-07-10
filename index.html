@@ -158,11 +158,11 @@
 <p>To start, let’s add an intervention effect that gives an immediate boost in individual-level outcomes, followed by slow further improvement. We’ll also add an effect representing a potential confound - a global improvement in the overall population (what an economist might call a “secular trend”).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_fixed_effect</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
 <span>    condition <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
 <span>      <span class="va">condition</span> <span class="op">==</span> <span class="st">"bsln"</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>      <span class="va">condition</span> <span class="op">==</span> <span class="st">"intv"</span> <span class="op">~</span> <span class="fl">.50</span> <span class="op">+</span> <span class="fl">.10</span><span class="op">*</span><span class="va">local_time</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">add_fixed_effect</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
 <span>    popwide_decline <span class="op">=</span> <span class="fl">.10</span><span class="op">*</span><span class="va">chron_time</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
@@ -176,7 +176,7 @@
 <span><span class="co">#&gt; 5         5 c1     001            1 bsln               0               6     1</span></span>
 <span><span class="co">#&gt; 6         6 c1     001            1 bsln               0               6     1</span></span>
 <span><span class="co">#&gt; # ℹ 3 more variables: member &lt;int&gt;, .condition &lt;dbl&gt;, .popwide_decline &lt;dbl&gt;</span></span></code></pre></div>
-<p>Underneath the hood, <code>add_fixed_effect()</code> is a thin wrapper around <code>mutate()</code> that does a few things: first, it limits the number of variables that can be created in a single call to exactly one named argument. This admittedly creates some redundant work for the user, who now has to call <code>add_fixed_effect()</code> multiple times, but comes with the advantage of forcing more readable code for these designs. All effect generation functions (more on these below) in <code>rollout</code> follow this convention. Second, they pre-pend all effect variables with a “<code>.</code>” to make it obvious which variables in the <code>simulated_trials</code> dataframe are data and which are effects that will eventually be used in the generation of an outcome variable. In this way, the user can focus on data that they want the effect to be associated with, rather than keeping variable names straight. It also facilitates the creation of an outcome creation function, which can automatically search for effects in <code>simulated_trials</code> and aggregate them into an outcome.</p>
+<p>Underneath the hood, <code><a href="reference/add_fixed_effect.html">add_fixed_effect()</a></code> is a thin wrapper around <code>mutate()</code> that does a few things: first, it limits the number of variables that can be created in a single call to exactly one named argument. This admittedly creates some redundant work for the user, who now has to call <code><a href="reference/add_fixed_effect.html">add_fixed_effect()</a></code> multiple times, but comes with the advantage of forcing more readable code for these designs. All effect generation functions (more on these below) in <code>rollout</code> follow this convention. Second, they pre-pend all effect variables with a “<code>.</code>” to make it obvious which variables in the <code>simulated_trials</code> dataframe are data and which are effects that will eventually be used in the generation of an outcome variable. In this way, the user can focus on data that they want the effect to be associated with, rather than keeping variable names straight. It also facilitates the creation of an outcome creation function, which can automatically search for effects in <code>simulated_trials</code> and aggregate them into an outcome.</p>
 </div>
 <div class="section level4">
 <h4 id="random-effects">Random effects<a class="anchor" aria-label="anchor" href="#random-effects"></a>
@@ -184,7 +184,7 @@
 <p>Random effects are simulated similarly to fixed effects, except that it is sometimes important to take nesting structure into account. For example, to create a class-level random intercept, we need to specify that classes are nested within sites and cohorts, like so:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_random_effect</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/add_random_effect.html">add_random_effect</a></span><span class="op">(</span></span>
 <span>    instructor_experience <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">.30</span><span class="op">)</span>,</span>
 <span>    .nesting <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cohort"</span>, <span class="st">"site"</span>, <span class="st">"class"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -203,7 +203,7 @@
 <p>As another example in this trial, it might also be important for even instances of a given class to share variance because they have overlapping students.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_random_effect</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/add_random_effect.html">add_random_effect</a></span><span class="op">(</span></span>
 <span>    student_cohesion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">.20</span><span class="op">)</span>,</span>
 <span>    .nesting <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cohort"</span>, <span class="st">"site"</span>, <span class="st">"class"</span>, <span class="st">"local_time"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -227,7 +227,7 @@
 <p>Finally, the simplest effect to add is random error, which is simple enough to specify with just a variance.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_error</span><span class="op">(</span>variance <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="reference/add_error.html">add_error</a></span><span class="op">(</span>variance <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -236,7 +236,7 @@
 <p>We can add three different types of outcome variables: linear, binary (logistic), and Poisson. Unlike the effects above, these at NOT automatically prepended with “.” because they are observed values - rather than effects, they are data. Additionally, both the binary and Poisson functions return multiple columns, including the final observed output column (i.e., the simulated binary outcome) and the associated input columns that were involved in producing it (i.e., y_linear, y_prob).</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulated_trials</span> <span class="op">&lt;-</span> <span class="va">simulated_trials</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">add_binary_outcome</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/add_binary_outcome.html">add_binary_outcome</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">simulated_trials</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 17</span></span>

@@ -7,7 +7,13 @@
 <url><loc>https://iancero.github.io/rollout/SUPPORT.html</loc></url>
 <url><loc>https://iancero.github.io/rollout/authors.html</loc></url>
 <url><loc>https://iancero.github.io/rollout/index.html</loc></url>
+<url><loc>https://iancero.github.io/rollout/reference/add_binary_outcome.html</loc></url>
+<url><loc>https://iancero.github.io/rollout/reference/add_error.html</loc></url>
+<url><loc>https://iancero.github.io/rollout/reference/add_fixed_effect.html</loc></url>
+<url><loc>https://iancero.github.io/rollout/reference/add_linear_outcome.html</loc></url>
 <url><loc>https://iancero.github.io/rollout/reference/add_parameter.html</loc></url>
+<url><loc>https://iancero.github.io/rollout/reference/add_poisson_outcome.html</loc></url>
+<url><loc>https://iancero.github.io/rollout/reference/add_random_effect.html</loc></url>
 <url><loc>https://iancero.github.io/rollout/reference/eval_between.html</loc></url>
 <url><loc>https://iancero.github.io/rollout/reference/eval_bias.html</loc></url>
 <url><loc>https://iancero.github.io/rollout/reference/eval_greater_than.html</loc></url>
