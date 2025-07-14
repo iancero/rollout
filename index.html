@@ -68,16 +68,25 @@
 <strong>Fit models</strong> across multiple simulated replicates.</li>
 <li>
 <strong>Evaluate bias and power</strong> of the planned design.</li>
-<li>
-<strong>Visualize results</strong> to inform design decisions.</li>
 </ol>
 <p>By following this pipeline, you can efficiently evaluate and optimize your rollout trial design before conducting your study.</p>
+</div>
+<div class="section level2">
+<h2 id="installing-the-rollout-package">Installing the <code>rollout</code> Package<a class="anchor" aria-label="anchor" href="#installing-the-rollout-package"></a>
+</h2>
+<p>You can install the development version of <code>rollout</code> directly from GitHub using the <code>remotes</code> package:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install remotes package if needed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Install rollout from GitHub</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"iancero/rollout"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="setup-and-package-loading">Setup and Package Loading<a class="anchor" aria-label="anchor" href="#setup-and-package-loading"></a>
 </h2>
 <p>We begin by loading the required packages and setting a seed for reproducibility. Throughout this tutorial, we will use the <code>tidyverse</code> for data manipulation and plotting, and the <code>rollout</code> package for design, simulation, and evaluation of rollout trials.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: package 'tidyverse' was built under R version 4.4.3</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iancero/rollout" class="external-link">rollout</a></span><span class="op">)</span></span>
@@ -96,7 +105,7 @@
 <li>Each cohort transitions to the intervention (<code>"intv"</code>) at a different time while data are collected continuously.</li>
 </ul>
 <p>We use a <code>tribble()</code> for clarity, then convert to long format using <code><a href="reference/pivot_schedule_longer.html">pivot_schedule_longer()</a></code>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints</span></span>
 <span><span class="va">rollout_schedule</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">cohort</span>, <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">t1</span>, <span class="op">~</span><span class="va">t2</span>, <span class="op">~</span><span class="va">t3</span>, <span class="op">~</span><span class="va">t4</span>, <span class="op">~</span><span class="va">t5</span>, <span class="op">~</span><span class="va">t6</span>, <span class="op">~</span><span class="va">t7</span>, <span class="op">~</span><span class="va">t8</span>,</span>
@@ -113,23 +122,10 @@
 <span><span class="co"># Transform to long format for simulation</span></span>
 <span><span class="va">long_schedule</span> <span class="op">&lt;-</span> <span class="va">rollout_schedule</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/pivot_schedule_longer.html">pivot_schedule_longer</a></span><span class="op">(</span>time_cols <span class="op">=</span> <span class="fu">starts_with</span><span class="op">(</span><span class="st">"t"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 64 × 4</span></span>
-<span><span class="co">#&gt;    cohort site  chron_time condition</span></span>
-<span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;    </span></span>
-<span><span class="co">#&gt;  1      1 A              1 ctrl     </span></span>
-<span><span class="co">#&gt;  2      1 A              2 ctrl     </span></span>
-<span><span class="co">#&gt;  3      1 A              3 ctrl     </span></span>
-<span><span class="co">#&gt;  4      1 A              4 intv     </span></span>
-<span><span class="co">#&gt;  5      1 A              5 intv     </span></span>
-<span><span class="co">#&gt;  6      1 A              6 intv     </span></span>
-<span><span class="co">#&gt;  7      1 A              7 intv     </span></span>
-<span><span class="co">#&gt;  8      1 A              8 intv     </span></span>
-<span><span class="co">#&gt;  9      1 B              1 ctrl     </span></span>
-<span><span class="co">#&gt; 10      1 B              2 ctrl     </span></span>
-<span><span class="co">#&gt; # ℹ 54 more rows</span></span>
 <span></span>
 <span><span class="co"># Preview structure</span></span>
-<span><span class="va">long_schedule</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">long_schedule</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 5</span></span>
 <span><span class="co">#&gt;   cohort site  chron_time condition local_time</span></span>
 <span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;</span></span>
@@ -139,6 +135,256 @@
 <span><span class="co">#&gt; 4      1 A              4 intv               0</span></span>
 <span><span class="co">#&gt; 5      1 A              5 intv               1</span></span>
 <span><span class="co">#&gt; 6      1 A              6 intv               2</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="adding-unit-level-information">Adding Unit-Level Information<a class="anchor" aria-label="anchor" href="#adding-unit-level-information"></a>
+</h2>
+<p>Next, we specify the <strong>unit-level information</strong> for each site, which is sometimes available in advance of a trial. For this example, each site will have a <strong>slightly different number of units</strong>, reflecting real-world differences in site sizes.</p>
+<p>We will then join this information to our long-format rollout schedule using <code><a href="reference/join_info.html">join_info()</a></code>. This will expand the dataset to include a row for each unit at each timepoint.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create unit-level information with variable site sizes</span></span>
+<span><span class="va">unit_info</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
+<span>  <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">n_units</span>,</span>
+<span>   <span class="st">"A"</span>,   <span class="fl">18</span>,</span>
+<span>   <span class="st">"B"</span>,   <span class="fl">22</span>,</span>
+<span>   <span class="st">"C"</span>,   <span class="fl">20</span>,</span>
+<span>   <span class="st">"D"</span>,   <span class="fl">19</span>,</span>
+<span>   <span class="st">"E"</span>,   <span class="fl">21</span>,</span>
+<span>   <span class="st">"F"</span>,   <span class="fl">20</span>,</span>
+<span>   <span class="st">"G"</span>,   <span class="fl">23</span>,</span>
+<span>   <span class="st">"H"</span>,   <span class="fl">17</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Join unit-level info to the long-format schedule</span></span>
+<span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/join_info.html">join_info</a></span><span class="op">(</span></span>
+<span>  <span class="va">long_schedule</span>,</span>
+<span>  unit_info <span class="op">=</span> <span class="va">unit_info</span>,</span>
+<span>  by <span class="op">=</span> <span class="st">"site"</span>,</span>
+<span>  uncount_vars <span class="op">=</span> <span class="st">"n_units"</span>,</span>
+<span>  .ids <span class="op">=</span> <span class="st">"unit_id"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview the expanded design</span></span>
+<span><span class="va">design_df</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 6</span></span>
+<span><span class="co">#&gt;   cohort site  chron_time condition local_time unit_id</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1      1 A              1 ctrl               0       1</span></span>
+<span><span class="co">#&gt; 2      1 A              1 ctrl               0       2</span></span>
+<span><span class="co">#&gt; 3      1 A              1 ctrl               0       3</span></span>
+<span><span class="co">#&gt; 4      1 A              1 ctrl               0       4</span></span>
+<span><span class="co">#&gt; 5      1 A              1 ctrl               0       5</span></span>
+<span><span class="co">#&gt; 6      1 A              1 ctrl               0       6</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="adding-simulation-parameters">Adding Simulation Parameters<a class="anchor" aria-label="anchor" href="#adding-simulation-parameters"></a>
+</h2>
+<p>We will now add <strong>simulation parameters</strong> to our design. A key advantage of <code>rollout</code> is the ability to expand a parameter grid, enabling the evaluation of <strong>multiple scenarios</strong> within the same simulation pipeline.</p>
+<p>In this example: - We will evaluate <strong>two intervention effect sizes</strong> (<code>b_intv = 0.2</code> for a small effect, <code>b_intv = 0.5</code> for a moderate effect). - We will specify a constant <strong>site-level standard deviation (<code>sigma_site = 0.5</code>)</strong> and <strong>unit-level residual standard deviation (<code>sigma_unit = 1</code>)</strong>.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_parameter.html">add_parameter</a></span><span class="op">(</span></span>
+<span>    b_intv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>    sigma_site <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>    sigma_unit <span class="op">=</span> <span class="fl">1</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview to confirm parameter expansion</span></span>
+<span><span class="va">design_df</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 9</span></span>
+<span><span class="co">#&gt;   cohort site  chron_time condition local_time unit_id b_intv sigma_site</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1      1 A              1 ctrl               0       1    0.2        0.5</span></span>
+<span><span class="co">#&gt; 2      1 A              1 ctrl               0       1    0.5        0.5</span></span>
+<span><span class="co">#&gt; 3      1 A              1 ctrl               0       2    0.2        0.5</span></span>
+<span><span class="co">#&gt; 4      1 A              1 ctrl               0       2    0.5        0.5</span></span>
+<span><span class="co">#&gt; 5      1 A              1 ctrl               0       3    0.2        0.5</span></span>
+<span><span class="co">#&gt; 6      1 A              1 ctrl               0       3    0.5        0.5</span></span>
+<span><span class="co">#&gt; # ℹ 1 more variable: sigma_unit &lt;dbl&gt;</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="initializing-replicates">Initializing Replicates<a class="anchor" aria-label="anchor" href="#initializing-replicates"></a>
+</h2>
+<p>After adding simulation parameters, we expand our design to include <strong>replicates</strong>. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.</p>
+<p>Here, we initialize <strong>10 replicates</strong> to keep memory usage manageable for demonstration. (In practice, you may use 100+ replicates for stable power estimation.)</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/initialize_replicates.html">initialize_replicates</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview structure with replicate IDs</span></span>
+<span><span class="va">design_df</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 10</span></span>
+<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time unit_id b_intv</span></span>
+<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1         1      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 2         2      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 3         3      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 4         4      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 5         5      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 6         6      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; # ℹ 2 more variables: sigma_site &lt;dbl&gt;, sigma_unit &lt;dbl&gt;</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="simulating-outcomes">Simulating Outcomes<a class="anchor" aria-label="anchor" href="#simulating-outcomes"></a>
+</h2>
+<p>We now simulate the outcome data according to our specified design. This prepares the dataset for model fitting, power estimation, and bias evaluation.</p>
+<hr>
+<div class="section level3">
+<h3 id="adding-a-fixed-time-trend">Adding a Fixed Time Trend<a class="anchor" aria-label="anchor" href="#adding-a-fixed-time-trend"></a>
+</h3>
+<p>First, we add a <strong>small negative time trend</strong> (<code>b_time = -0.05</code>) to represent gradual improvement over time, independent of intervention.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_parameter.html">add_parameter</a></span><span class="op">(</span>b_time <span class="op">=</span> <span class="op">-</span><span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="adding-fixed-effects">Adding Fixed Effects<a class="anchor" aria-label="anchor" href="#adding-fixed-effects"></a>
+</h3>
+<p>Next, we add fixed effects for: - The intervention effect, applied when <code>condition == "intv"</code>. - The time trend, scaled by <code>chron_time</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
+<span>    intv_effect <span class="op">=</span> <span class="va">b_intv</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"intv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
+<span>    time_trend <span class="op">=</span> <span class="va">b_time</span> <span class="op">*</span> <span class="va">chron_time</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="adding-random-intercepts-for-sites">Adding Random Intercepts for Sites<a class="anchor" aria-label="anchor" href="#adding-random-intercepts-for-sites"></a>
+</h3>
+<p>We add a random intercept at the site level to simulate between-site variability.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_random_effect.html">add_random_effect</a></span><span class="op">(</span></span>
+<span>    site_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="va">sigma_site</span><span class="op">)</span>,</span>
+<span>    .nesting <span class="op">=</span> <span class="st">"site"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="adding-unit-level-residual-error">Adding Unit-Level Residual Error<a class="anchor" aria-label="anchor" href="#adding-unit-level-residual-error"></a>
+</h3>
+<p>We add unit-level residual error with variance <code>sigma_unit^2</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_error.html">add_error</a></span><span class="op">(</span>variance <span class="op">=</span> <span class="va">sigma_unit</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="generating-the-linear-outcome">Generating the Linear Outcome<a class="anchor" aria-label="anchor" href="#generating-the-linear-outcome"></a>
+</h3>
+<p>Finally, we generate a linear outcome (y_linear) by summing all fixed, random, and error components.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_linear_outcome.html">add_linear_outcome</a></span><span class="op">(</span>output_col <span class="op">=</span> <span class="st">"y_linear"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview simulated data</span></span>
+<span><span class="va">design_df</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 16</span></span>
+<span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time unit_id b_intv</span></span>
+<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1         1      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 2         2      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 3         3      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 4         4      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 5         5      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; 6         6      1 A              1 ctrl               0       1    0.2</span></span>
+<span><span class="co">#&gt; # ℹ 8 more variables: sigma_site &lt;dbl&gt;, sigma_unit &lt;dbl&gt;, b_time &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   .intv_effect &lt;dbl&gt;, .time_trend &lt;dbl&gt;, .site_intercept &lt;dbl&gt;, .error &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   y_linear &lt;dbl&gt;</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="fitting-models-across-replicates">Fitting Models Across Replicates<a class="anchor" aria-label="anchor" href="#fitting-models-across-replicates"></a>
+</h2>
+<p>With our simulated outcomes generated, we now fit our <strong>planned analysis model</strong> across all replicates and parameter scenarios.</p>
+<p>This process is automatically conducted in parallel, but you’ll need to load any packages for that parallel process explicitly (see line <code>packages = "lmerTest"</code>).</p>
+<p>In this example: - We use <strong>linear mixed-effects models</strong> to account for site-level clustering. - Our model includes: - <code>condition</code> (intervention vs control), - <code>chron_time</code> (continuous time trend), - A random intercept for <code>site</code>. - We group by <code>sample_id</code> (replicates) and <code>b_intv</code> (effect size scenario).</p>
+<p>This approach allows us to evaluate <strong>bias and power</strong> across both <strong>replicates</strong> and <strong>effect size conditions</strong>.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fitted_models</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">b_intv</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">nest</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/fit_models.html">fit_models</a></span><span class="op">(</span></span>
+<span>    .x <span class="op">=</span> <span class="va">data</span>,</span>
+<span>    .f <span class="op">=</span> <span class="op">~</span> <span class="fu">lmer</span><span class="op">(</span></span>
+<span>      formula <span class="op">=</span> <span class="va">y_linear</span> <span class="op">~</span> <span class="va">condition</span> <span class="op">+</span> <span class="va">chron_time</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">site</span><span class="op">)</span>,</span>
+<span>      data <span class="op">=</span> <span class="va">.x</span><span class="op">)</span>,</span>
+<span>    packages <span class="op">=</span> <span class="st">"lmerTest"</span><span class="op">)</span> <span class="co"># load lmerTest in each parallel process</span></span>
+<span></span>
+<span><span class="va">fitted_models</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: lmerTest</span></span>
+<span><span class="co">#&gt; Loading required package: lme4</span></span>
+<span><span class="co">#&gt; Warning: package 'lme4' was built under R version 4.4.2</span></span>
+<span><span class="co">#&gt; Loading required package: Matrix</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'Matrix'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:tidyr':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     expand, pack, unpack</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'lmerTest'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:lme4':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     lmer</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     step</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 4</span></span>
+<span><span class="co">#&gt;   sample_id b_intv data                  model     </span></span>
+<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;list&gt;                &lt;list&gt;    </span></span>
+<span><span class="co">#&gt; 1         1    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span>
+<span><span class="co">#&gt; 2         2    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span>
+<span><span class="co">#&gt; 3         3    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span>
+<span><span class="co">#&gt; 4         4    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span>
+<span><span class="co">#&gt; 5         5    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span>
+<span><span class="co">#&gt; 6         6    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="extracting-and-evaluating-results">Extracting and Evaluating Results<a class="anchor" aria-label="anchor" href="#extracting-and-evaluating-results"></a>
+</h2>
+<p>After fitting the models, we now <strong>extract key results</strong> and <strong>evaluate bias and power</strong> for our intervention effect.</p>
+<p>We will: - <strong>Extract model estimates</strong> using <code><a href="reference/extract_model_results.html">extract_model_results()</a></code>. - <strong>Summarize power</strong> by calculating the proportion of p-values below .05 (done by default in <code>evaluate_model_results). - **Summarize bias** of the intervention effect using</code>eval_bias()<code>. - **Estimate a critical value** by calculating the observed value of b-estimates above the 97.5th percentile, using</code>eval_quantile()`.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Extract tidy model results</span></span>
+<span><span class="va">model_results</span> <span class="op">&lt;-</span> <span class="va">fitted_models</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/extract_model_results.html">extract_model_results</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Summarize bias and power</span></span>
+<span><span class="va">summary_results</span> <span class="op">&lt;-</span> <span class="va">model_results</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">b_intv</span>, <span class="va">term</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/evaluate_model_results.html">evaluate_model_results</a></span><span class="op">(</span></span>
+<span>    bias <span class="op">=</span> <span class="fu"><a href="reference/eval_bias.html">eval_bias</a></span><span class="op">(</span><span class="va">estimate</span>, term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"(Intercept)"</span> <span class="op">=</span> <span class="fl">0</span>, conditionintv <span class="op">=</span> <span class="va">b_intv</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    critical_val <span class="op">=</span> <span class="fu"><a href="reference/eval_quantile.html">eval_quantile</a></span><span class="op">(</span><span class="va">estimate</span>, term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditionintv"</span> <span class="op">=</span> <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: There were 16 warnings in `dplyr::summarise()`.</span></span>
+<span><span class="co">#&gt; The first warning was:</span></span>
+<span><span class="co">#&gt; ℹ In argument: `bias = eval_bias(estimate, term = c(`(Intercept)` = 0,</span></span>
+<span><span class="co">#&gt;   conditionintv = b_intv))`.</span></span>
+<span><span class="co">#&gt; ℹ In group 2: `b_intv = 0.2` and `term = "chron_time"`.</span></span>
+<span><span class="co">#&gt; Caused by warning:</span></span>
+<span><span class="co">#&gt; ! Term 'chron_time' not found in `term` mapping. Returning NA.</span></span>
+<span><span class="co">#&gt; ℹ Run `dplyr::last_dplyr_warnings()` to see the 15 remaining warnings.</span></span>
+<span></span>
+<span><span class="co"># View summary of bias and power</span></span>
+<span><span class="va">summary_results</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 6</span></span>
+<span><span class="co">#&gt; # Groups:   b_intv [2]</span></span>
+<span><span class="co">#&gt;    b_intv term            n_models power   bias critical_val</span></span>
+<span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;              &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1    0.2 (Intercept)           10   0   -0.154       NA    </span></span>
+<span><span class="co">#&gt;  2    0.2 chron_time            10   0.7 NA           NA    </span></span>
+<span><span class="co">#&gt;  3    0.2 conditionintv         10   0.5 NA            0.334</span></span>
+<span><span class="co">#&gt;  4    0.2 sd__(Intercept)       10  NA   NA           NA    </span></span>
+<span><span class="co">#&gt;  5    0.2 sd__Observation       10  NA   NA           NA    </span></span>
+<span><span class="co">#&gt;  6    0.5 (Intercept)           10   0   -0.193       NA    </span></span>
+<span><span class="co">#&gt;  7    0.5 chron_time            10   0.4 NA           NA    </span></span>
+<span><span class="co">#&gt;  8    0.5 conditionintv         10   1   NA            0.663</span></span>
+<span><span class="co">#&gt;  9    0.5 sd__(Intercept)       10  NA   NA           NA    </span></span>
+<span><span class="co">#&gt; 10    0.5 sd__Observation       10  NA   NA           NA</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
