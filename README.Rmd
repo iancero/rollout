@@ -37,9 +37,20 @@ The `rollout` R package supports the design and analysis of rollout trials using
 4. **Simulate outcomes** under the specified design.
 5. **Fit models** across multiple simulated replicates.
 6. **Evaluate bias and power** of the planned design.
-7. **Visualize results** to inform design decisions.
 
 By following this pipeline, you can efficiently evaluate and optimize your rollout trial design before conducting your study.
+
+## Installing the `rollout` Package
+
+You can install the development version of `rollout` directly from GitHub using the `remotes` package:
+
+```{r, eval=FALSE}
+# Install remotes package if needed
+install.packages("remotes")
+
+# Install rollout from GitHub
+remotes::install_github("iancero/rollout")
+```
 
 ## Setup and Package Loading
 
@@ -222,9 +233,63 @@ design_df |>
   head()
 ```
 
+## Fitting Models Across Replicates
 
+With our simulated outcomes generated, we now fit our **planned analysis model** across all replicates and parameter scenarios.
 
+This process is automatically conducted in parallel, but you'll need to load any packages for that parallel process explicitly (see line `packages = "lmerTest"`).
 
+In this example:
+- We use **linear mixed-effects models** to account for site-level clustering.
+- Our model includes:
+    - `condition` (intervention vs control),
+    - `chron_time` (continuous time trend),
+    - A random intercept for `site`.
+- We group by `sample_id` (replicates) and `b_intv` (effect size scenario).
+
+This approach allows us to evaluate **bias and power** across both **replicates** and **effect size conditions**.
+
+```{r fit-models}
+fitted_models <- design_df |>
+  group_by(sample_id, b_intv) |>
+  nest() |>
+  ungroup() |> 
+  fit_models(
+    .x = data,
+    .f = ~ lmer(
+      formula = y_linear ~ condition + chron_time + (1 | site),
+      data = .x),
+    packages = "lmerTest") # load lmerTest in each parallel process
+
+fitted_models |> 
+  head()
+```
+## Extracting and Evaluating Results
+
+After fitting the models, we now **extract key results** and **evaluate bias and power** for our intervention effect.
+
+We will:
+- **Extract model estimates** using `extract_model_results()`.
+- **Summarize power** by calculating the proportion of p-values below .05 (done by default in `evaluate_model_results).
+- **Summarize bias** of the intervention effect using `eval_bias()`.
+- **Estimate a critical value** by calculating the observed value of b-estimates above the 97.5th percentile, using `eval_quantile()`.
+
+```{r extract-and-evaluate}
+# Extract tidy model results
+model_results <- fitted_models |>
+  extract_model_results()
+
+# Summarize bias and power
+summary_results <- model_results |>
+  group_by(b_intv, term) |>
+  evaluate_model_results(
+    bias = eval_bias(estimate, term = c("(Intercept)" = 0, conditionintv = b_intv)),
+    critical_val = eval_quantile(estimate, term = c("conditionintv" = 0.975))
+  )
+
+# View summary of bias and power
+summary_results
+```
 
 
 
