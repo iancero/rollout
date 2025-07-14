@@ -86,12 +86,14 @@ add_random_effect <- function(design_df, ..., .nesting = NULL) {
 #' add_error(df, variance = 2)
 #' @export
 add_error <- function(.data, variance = 1) {
+  variance <- rlang::enquo(variance)  # capture variance expression
+
   # Save original grouping
   original_groups <- dplyr::group_vars(.data)
 
   .data <- .data %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(.error = rnorm(n(), sd = sqrt(variance)))
+    dplyr::mutate(.error = rnorm(n(), sd = sqrt(!!variance)))
 
   # Restore original grouping
   if (length(original_groups) > 0) {
