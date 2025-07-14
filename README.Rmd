@@ -82,7 +82,8 @@ long_schedule <- rollout_schedule |>
   pivot_schedule_longer(time_cols = starts_with("t"))
 
 # Preview structure
-long_schedule |> head()
+long_schedule |> 
+  head()
 ```
 
 ## Adding Unit-Level Information
@@ -115,7 +116,8 @@ design_df <- join_info(
 )
 
 # Preview the expanded design
-design_df |> head()
+design_df |> 
+  head()
 ```
 
 
@@ -136,7 +138,8 @@ design_df <- design_df |>
   )
 
 # Preview to confirm parameter expansion
-design_df |> head()
+design_df |> 
+  head()
 ```
 
 
@@ -151,7 +154,8 @@ design_df <- design_df |>
   initialize_replicates(n = 10)
 
 # Preview structure with replicate IDs
-design_df |> head()
+design_df |> 
+  head()
 ```
 
 ## Simulating Outcomes
@@ -178,9 +182,9 @@ Next, we add fixed effects for:
 ```{r add-intv-effect}
 design_df <- design_df |>
   add_fixed_effect(
-    intv_effect = b_intv * as.numeric(condition == "intv"),
-    time_trend = b_time * chron_time
-  )
+    intv_effect = b_intv * as.numeric(condition == "intv")) |>
+  add_fixed_effect(
+    time_trend = b_time * chron_time)
 ```
 
 
@@ -214,7 +218,8 @@ design_df <- design_df |>
   add_linear_outcome(output_col = "y_linear")
 
 # Preview simulated data
-design_df |> head()
+design_df |> 
+  head()
 ```
 
 
