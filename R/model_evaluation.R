@@ -133,6 +133,8 @@ evaluate_model_results <- function(
   results |>
     dplyr::summarise(
       n_models = dplyr::n(),
+      mean_estimate = mean(estimate, na.rm = TRUE),
+      mean_std.error = mean(std.error, na.rm = TRUE),
       power = dplyr::if_else(
         condition = all(is.na(p.value)),
         true = NA_real_,
