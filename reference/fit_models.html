@@ -91,7 +91,7 @@ the fitted model objects returned by <code>.f</code>.</p>
     <p>This function is intended for use in simulation pipelines where multiple datasets
 are generated (e.g., via <code>simulate_datasets()</code>), and models need to be fitted to
 each dataset efficiently in parallel.</p>
-<p>It uses <code>pbapply::pblapply()</code> to provide a progress bar during model fitting,
+<p>It uses <code><a href="https://peter.solymos.org/pbapply/reference/pbapply.html" class="external-link">pbapply::pblapply()</a></code> to provide a progress bar during model fitting,
 and <code><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">parallel::makeCluster()</a></code> for multi-core processing.</p>
 <p>Packages specified in <code>packages</code> will be loaded on each worker to ensure model-fitting
 functions that depend on those packages work correctly in parallel.</p>
@@ -100,13 +100,12 @@ functions that depend on those packages work correctly in parallel.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in library(dplyr):</span> there is no package called ‘dplyr’</span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lme4/lme4/" class="external-link">lme4</a></span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in library(lme4):</span> there is no package called ‘lme4’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: Matrix</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create example grouped datasets for mixed models</span></span></span>
-<span class="r-in"><span><span class="va">datasets</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">datasets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">~</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="va">sleepstudy</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sleepstudy</span><span class="op">)</span>, <span class="fl">50</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="op">]</span></span></span>
@@ -114,26 +113,55 @@ functions that depend on those packages work correctly in parallel.</p>
 <span class="r-in"><span>    <span class="va">df</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tibble(id = 1:5, data = map(1:5, ~{    df &lt;- sleepstudy[sample(nrow(sleepstudy), 50, replace = TRUE),         ]    df$Subject &lt;- factor(df$Subject)    df})):</span> could not find function "tibble"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fit linear mixed models in parallel</span></span></span>
 <span class="r-in"><span><span class="va">fitted_models</span> <span class="op">&lt;-</span> <span class="fu">fit_models</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">datasets</span>,</span></span>
 <span class="r-in"><span>  .x <span class="op">=</span> <span class="va">data</span>,</span></span>
-<span class="r-in"><span>  .f <span class="op">=</span> <span class="op">~</span> <span class="fu">lme4</span><span class="fu">::</span><span class="fu">lmer</span><span class="op">(</span><span class="va">Reaction</span> <span class="op">~</span> <span class="va">Days</span> <span class="op">+</span> <span class="op">(</span><span class="va">Days</span> <span class="op">|</span> <span class="va">Subject</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">.</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  .f <span class="op">=</span> <span class="op">~</span> <span class="fu">lme4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span><span class="va">Reaction</span> <span class="op">~</span> <span class="va">Days</span> <span class="op">+</span> <span class="op">(</span><span class="va">Days</span> <span class="op">|</span> <span class="va">Subject</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">.</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lme4"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'datasets' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Inspect the first fitted mixed model</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">model</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'fitted_models' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Linear mixed model fit by REML ['lmerMod']</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: Reaction ~ Days + (Days | Subject)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data: .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> REML criterion at convergence: 473.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Scaled residuals: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Min       1Q   Median       3Q      Max </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -2.14075 -0.38566  0.08078  0.33280  2.78587 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Random effects:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Groups   Name        Variance Std.Dev. Corr </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Subject  (Intercept) 679.83   26.074        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Days         59.84    7.736   -0.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Residual             339.23   18.418        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of obs: 50, groups:  Subject, 17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fixed effects:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std. Error t value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  251.499      8.859  28.391</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Days           8.681      2.501   3.471</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Correlation of Fixed Effects:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      (Intr)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Days -0.397</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Tidy the fitted models using extract_model_results() for further evaluation</span></span></span>
 <span class="r-in"><span><span class="va">extracted</span> <span class="op">&lt;-</span> <span class="fu"><a href="extract_model_results.html">extract_model_results</a></span><span class="op">(</span><span class="va">fitted_models</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘tidyr’</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">extracted</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'extracted' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      id data          model     effect  group term  estimate std.error statistic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1 <span style="color: #949494;">&lt;df [50 × 3]&gt;</span> <span style="color: #949494;">&lt;lmerMod&gt;</span> fixed   <span style="color: #BB0000;">NA</span>    (Int… 251.          8.86     28.4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     1 <span style="color: #949494;">&lt;df [50 × 3]&gt;</span> <span style="color: #949494;">&lt;lmerMod&gt;</span> fixed   <span style="color: #BB0000;">NA</span>    Days    8.68        2.50      3.47</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>     1 <span style="color: #949494;">&lt;df [50 × 3]&gt;</span> <span style="color: #949494;">&lt;lmerMod&gt;</span> ran_pa… Subj… sd__…  26.1        <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>     1 <span style="color: #949494;">&lt;df [50 × 3]&gt;</span> <span style="color: #949494;">&lt;lmerMod&gt;</span> ran_pa… Subj… cor_…  -<span style="color: #BB0000;">0.051</span><span style="color: #BB0000; text-decoration: underline;">6</span>     <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>     1 <span style="color: #949494;">&lt;df [50 × 3]&gt;</span> <span style="color: #949494;">&lt;lmerMod&gt;</span> ran_pa… Subj… sd__…   7.74       <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>     1 <span style="color: #949494;">&lt;df [50 × 3]&gt;</span> <span style="color: #949494;">&lt;lmerMod&gt;</span> ran_pa… Resi… sd__…  18.4        <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span>   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Summarise estimates for 'Days' across simulated fits</span></span></span>
 <span class="r-in"><span><span class="va">extracted</span> <span class="op">|&gt;</span></span></span>
@@ -142,7 +170,9 @@ functions that depend on those packages work correctly in parallel.</p>
 <span class="r-in"><span>    mean_estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">estimate</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    sd_estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">estimate</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘dplyr’</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = mean(estimate,     na.rm = TRUE), mean_std.error = mean(std.error, na.rm = TRUE),     power = dplyr::if_else(condition = all(is.na(p.value)), true = NA_real_,         false = mean(p.value &lt; alpha, na.rm = TRUE)), !!!summary_exprs,     !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = mean, sd = sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `power = dplyr::if_else(...)`.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> object 'p.value' not found</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

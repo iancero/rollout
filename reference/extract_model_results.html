@@ -37,7 +37,7 @@ summarisation and evaluation in simulation studies."></head><body>
     </div>
 
     <div class="ref-description section level2">
-    <p>Applies a tidying function (default <code>broom.mixed::tidy</code>) to a column of models,
+    <p>Applies a tidying function (default <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">broom.mixed::tidy</a></code>) to a column of models,
 returning a tidy data frame with one row per term per model, suitable for downstream
 summarisation and evaluation in simulation studies.</p>
     </div>
@@ -47,7 +47,7 @@ summarisation and evaluation in simulation studies.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extract_model_results</span><span class="op">(</span></span>
 <span>  <span class="va">models</span>,</span>
 <span>  model_col <span class="op">=</span> <span class="va">model</span>,</span>
-<span>  tidy_fun <span class="op">=</span> <span class="fu">broom.mixed</span><span class="fu">::</span><span class="va">tidy</span>,</span>
+<span>  tidy_fun <span class="op">=</span> <span class="fu">broom.mixed</span><span class="fu">::</span><span class="va"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span>,</span>
 <span>  .term <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -65,7 +65,7 @@ summarisation and evaluation in simulation studies.</p>
 
 
 <dt id="arg-tidy-fun">tidy_fun<a class="anchor" aria-label="anchor" href="#arg-tidy-fun"></a></dt>
-<dd><p>A tidying function to apply to each model. Default is <code>broom.mixed::tidy</code>.
+<dd><p>A tidying function to apply to each model. Default is <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">broom.mixed::tidy</a></code>.
 The function must return a data frame with a <code>term</code> column.</p></dd>
 
 
@@ -84,25 +84,41 @@ tidied model results, typically including columns such as <code>term</code>, <co
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in library(dplyr):</span> there is no package called ‘dplyr’</span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbolker/broom.mixed" class="external-link">broom.mixed</a></span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in library(broom.mixed):</span> there is no package called ‘broom.mixed’</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate and fit models</span></span></span>
-<span class="r-in"><span><span class="va">sim_models</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">sim_models</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  model <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tibble(id = 1:5, model = map(1:5, ~lm(mpg ~ wt, data = mtcars))):</span> could not find function "tibble"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract all terms</span></span></span>
 <span class="r-in"><span><span class="fu">extract_model_results</span><span class="op">(</span><span class="va">sim_models</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘tidyr’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 10 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       id model  term        estimate std.error statistic  p.value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1 <span style="color: #949494;">&lt;lm&gt;</span>   (Intercept)    37.3      1.88      19.9  8.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     1 <span style="color: #949494;">&lt;lm&gt;</span>   wt             -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     2 <span style="color: #949494;">&lt;lm&gt;</span>   (Intercept)    37.3      1.88      19.9  8.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     2 <span style="color: #949494;">&lt;lm&gt;</span>   wt             -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     3 <span style="color: #949494;">&lt;lm&gt;</span>   (Intercept)    37.3      1.88      19.9  8.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     3 <span style="color: #949494;">&lt;lm&gt;</span>   wt             -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     4 <span style="color: #949494;">&lt;lm&gt;</span>   (Intercept)    37.3      1.88      19.9  8.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     4 <span style="color: #949494;">&lt;lm&gt;</span>   wt             -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     5 <span style="color: #949494;">&lt;lm&gt;</span>   (Intercept)    37.3      1.88      19.9  8.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>     5 <span style="color: #949494;">&lt;lm&gt;</span>   wt             -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract only the slope term</span></span></span>
 <span class="r-in"><span><span class="fu">extract_model_results</span><span class="op">(</span><span class="va">sim_models</span>, .term <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘tidyr’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      id model  term  estimate std.error statistic  p.value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1 <span style="color: #949494;">&lt;lm&gt;</span>   wt       -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     2 <span style="color: #949494;">&lt;lm&gt;</span>   wt       -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>     3 <span style="color: #949494;">&lt;lm&gt;</span>   wt       -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>     4 <span style="color: #949494;">&lt;lm&gt;</span>   wt       -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>     5 <span style="color: #949494;">&lt;lm&gt;</span>   wt       -<span style="color: #BB0000;">5.34</span>     0.559     -<span style="color: #BB0000;">9.56</span> 1.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

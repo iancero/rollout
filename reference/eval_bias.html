@@ -69,7 +69,7 @@ Defaults to <code>FALSE</code>.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function is designed to be used inside <code>dplyr::summarise()</code> within a grouped
+    <p>This function is designed to be used inside <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">dplyr::summarise()</a></code> within a grouped
 tidyverse pipeline, typically after grouping by <code>term</code>. It computes the mean of
 <code>x</code> minus the true value for the corresponding term.</p>
 <p>If <code>term</code> is provided, the current grouping must include a <code>term</code> variable matching
@@ -80,37 +80,40 @@ the function will return <code>NA</code> with a warning.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in library(dplyr):</span> there is no package called ‘dplyr’</span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbolker/broom.mixed" class="external-link">broom.mixed</a></span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in library(broom.mixed):</span> there is no package called ‘broom.mixed’</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate and fit models</span></span></span>
-<span class="r-in"><span><span class="va">sim_models</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">sim_models</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">50</span>,</span></span>
 <span class="r-in"><span>  model <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="extract_model_results.html">extract_model_results</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘tidyr’</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compute bias relative to true value (hypothetical slope = -5)</span></span></span>
 <span class="r-in"><span><span class="va">sim_models</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">==</span> <span class="st">"wt"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">==</span> <span class="st">"wt"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="evaluate_model_results.html">evaluate_model_results</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    bias <span class="op">=</span> <span class="fu">eval_bias</span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="va">estimate</span>,</span></span>
 <span class="r-in"><span>      term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wt"</span> <span class="op">=</span> <span class="op">-</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘dplyr’</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = mean(estimate,     na.rm = TRUE), mean_std.error = mean(std.error, na.rm = TRUE),     power = dplyr::if_else(condition = all(is.na(p.value)), true = NA_real_,         false = mean(p.value &lt; alpha, na.rm = TRUE)), !!!summary_exprs,     !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = mean, sd = sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `bias = eval_bias(estimate, term = c(wt = -5))`.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `abort()`:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> could not find function "abort"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compute bias relative to zero for all terms</span></span></span>
 <span class="r-in"><span><span class="va">sim_models</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">term</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">term</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="evaluate_model_results.html">evaluate_model_results</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    bias <span class="op">=</span> <span class="fu">eval_bias</span><span class="op">(</span><span class="va">estimate</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘dplyr’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   term        n_models mean_estimate mean_std.error power  bias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> (Intercept)       50         37.3           1.88      1 37.3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> wt                50         -<span style="color: #BB0000;">5.34</span>          0.559     1 -<span style="color: #BB0000;">5.34</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
