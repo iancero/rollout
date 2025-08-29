@@ -133,8 +133,14 @@ evaluate_model_results <- function(
   results |>
     dplyr::summarise(
       n_models = dplyr::n(),
-      mean_estimate = mean(estimate, na.rm = TRUE),
-      mean_std.error = mean(std.error, na.rm = TRUE),
+      mean_estimate = dplyr::if_else(
+        condition = all(is.na(p.value)),
+        true = NA_real_,
+        false = mean(estimate, na.rm = TRUE)),
+      mean_std.error = dplyr::if_else(
+        condition = all(is.na(p.value)),
+        true = NA_real_,
+        false = mean(std.error, na.rm = TRUE)),
       power = dplyr::if_else(
         condition = all(is.na(p.value)),
         true = NA_real_,
@@ -210,7 +216,7 @@ evaluate_model_results <- function(
 #'   )
 #'
 #' @export
-eval_bias <- function(x, term = NULL, na.rm = FALSE) {
+eval_bias <- function(x, term = NULL, na.rm = FALSE, warnings = TRUE) {
   if (!is.numeric(x)) {
     rlang::abort("`x` must be numeric.")
   }
@@ -234,14 +240,46 @@ eval_bias <- function(x, term = NULL, na.rm = FALSE) {
 
   current_term <- as.character(group_vars$term)
   if (!current_term %in% names(term)) {
-    rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
+    # if (warnings) rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
     return(NA_real_)
   }
 
   bias <- mean(x - term[[current_term]], na.rm = na.rm)
-
   bias
 }
+
+# eval_bias_old <- function(x, term = NULL, na.rm = FALSE) {
+#   if (!is.numeric(x)) {
+#     rlang::abort("`x` must be numeric.")
+#   }
+#
+#   if (is.null(term)) {
+#     return(mean(x - 0, na.rm = na.rm))
+#   }
+#
+#   if (!rlang::is_named(term)) {
+#     abort("`term` must be a named vector (e.g., c(x = 1)).")
+#   }
+#
+#   group_vars <- dplyr::cur_group()
+#   if (is.null(group_vars) || length(group_vars) == 0) {
+#     abort("`eval_bias()` must be used inside a grouped `dplyr` context when `term` is provided.")
+#   }
+#
+#   if (!"term" %in% names(group_vars)) {
+#     abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_bias()`?")
+#   }
+#
+#   current_term <- as.character(group_vars$term)
+#   if (!current_term %in% names(term)) {
+#     rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
+#     return(NA_real_)
+#   }
+#
+#   bias <- mean(x - term[[current_term]], na.rm = na.rm)
+#
+#   bias
+# }
 
 
 #' Compute the proportion of values above term-specific thresholds within grouped simulation results
@@ -310,7 +348,7 @@ eval_greater_than <- function(x, term = NULL, na.rm = FALSE) {
 
   current_term <- as.character(group_vars$term)
   if (!current_term %in% names(term)) {
-    rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
+    # rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
     return(NA_real_)
   }
 
@@ -386,7 +424,7 @@ eval_less_than <- function(x, term = NULL, na.rm = FALSE) {
 
   current_term <- as.character(group_vars$term)
   if (!current_term %in% names(term)) {
-    rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
+    # rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
     return(NA_real_)
   }
 
@@ -469,7 +507,7 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
 
   current_term <- as.character(group_vars$term)
   if (!current_term %in% names(term)) {
-    rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
+    # rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
     return(NA_real_)
   }
 
@@ -557,7 +595,7 @@ eval_quantile <- function(x, term = NULL, na.rm = FALSE) {
 
   current_term <- as.character(group_vars$term)
   if (!current_term %in% names(term)) {
-    rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
+    # rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
     return(NA_real_)
   }
 
