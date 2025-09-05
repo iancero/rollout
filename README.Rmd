@@ -78,10 +78,10 @@ We use a `tribble()` for clarity, then convert to long format using `pivot_sched
 # Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints
 rollout_schedule <- tribble(
   ~cohort, ~site, ~t1, ~t2, ~t3, ~t4, ~t5, ~t6, ~t7, ~t8,
-       1,    "A",  "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv",
-       1,    "B",  "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv",
-       2,    "C",  "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv", "intv",
-       2,    "D",  "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv", "intv",
+       1,    "A",  "ctrl", "ctrl", "intv",  "intv", "intv", "intv", "intv", "intv",
+       1,    "B",  "ctrl", "ctrl", "intv",  "intv", "intv", "intv", "intv", "intv",
+       2,    "C",  "ctrl", "ctrl",  "ctrl", "intv", "intv", "intv", "intv", "intv",
+       2,    "D",  "ctrl", "ctrl",  "ctrl", "intv", "intv", "intv", "intv", "intv",
        3,    "E",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
        3,    "F",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
        4,    "G",  "ctrl", "ctrl", "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv",
@@ -158,7 +158,7 @@ design_df |>
 
 After adding simulation parameters, we expand our design to include **replicates**. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.
 
-Here, we initialize **10 replicates** to keep memory usage manageable for demonstration. (In practice, you may use 100+ replicates for stable power estimation.)
+Here, we use 10 replicates to keep the example lightweight. In practice, the number of replicates should be chosen based on the precision you want for your power estimate. A common guideline is: `n = p*(1-p)/(se^2)`, where `se` is the desired standard error of the power estimate and `p` is the target power (for example, p = 0.80). 
 
 ```{r initialize-replicates}
 design_df <- design_df |>

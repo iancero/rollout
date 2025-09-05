@@ -145,6 +145,7 @@ evaluate_model_results <- function(
         condition = all(is.na(p.value)),
         true = NA_real_,
         false = mean(p.value < alpha, na.rm = TRUE)),
+      # power_std.error = sqrt(power*(1-power)/n_models),
       !!!summary_exprs,
       !!!{
         if (.summarise_standard_broom) {

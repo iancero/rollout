@@ -1,0 +1,17 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# TODO: 
+
+[X] Make the warnings for the final code block clearer
+
+[X] Make sure there is is a default for the mean estimate to show up in the model summary (and standard deviation of the estimates / standard error)
+
+[X] Fix DEPENDS in NAMESPACE so that all of the right sub-packages are installed automatically (broom.mixed, lmerTest, pbapply, future). Hendricks ran into this problem last time 
+
+[ ] Make some visualization functions, especially one that will illustrate the rollout schedule by cohort
+
+[ ] See file "Fix this for Hendricks"
+

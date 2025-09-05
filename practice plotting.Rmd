@@ -1,0 +1,26 @@
+---
+title: "Untitled"
+date: "2025-08-29"
+---
+```{r}
+rollout_schedule
+
+# TODO: put the name of the condition in each cell
+
+ggplot(long_schedule, aes(x = chron_time, y = site, fill = condition)) +
+  geom_tile(width = 0.975, height = 0.95) +
+  facet_wrap(~ factor(cohort, ordered = TRUE), ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = c(ctrl = "grey80", intv = "steelblue")) +
+  scale_x_continuous(breaks = seq(min(long_schedule$chron_time),
+                                max(long_schedule$chron_time), 1),
+                   name = "Timepoint") +
+
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid = element_blank(),
+    axis.title.y = element_blank()
+  )
+```
+
+
+

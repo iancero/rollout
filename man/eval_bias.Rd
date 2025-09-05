@@ -4,7 +4,7 @@
 \alias{eval_bias}
 \title{Compute bias relative to term-specific true values within grouped simulation results}
 \usage{
-eval_bias(x, term = NULL, na.rm = FALSE)
+eval_bias(x, term = NULL, na.rm = FALSE, warnings = TRUE)
 }
 \arguments{
 \item{x}{A numeric vector of estimates (e.g., from a model term).}
