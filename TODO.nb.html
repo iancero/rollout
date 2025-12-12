@@ -1754,6 +1754,39 @@ display: none;
 <!-- rnb-text-begin -->
 <div id="todo" class="section level1">
 <h1>TODO:</h1>
+<p>Find ideal sample size (see below for example code): - Make a
+function that can take in a target power the analyst wants and return
+ideal SAMPLE SIZE - It also takes an upper and lower sample size to
+consider, and how many intervals along the way (e.g., 5) - It returns a
+dataframe, but also a FIGURE with the power curve - It should maybe also
+be able to vary 1 parameter at a time (e.g., effect size, same process
+as above)</p>
+<p>Another way to do this (probably faster) would be to create a
+population with an exactly zero condition effect. Then, inside that
+population, ask what the critical value is for the small fraction of
+p-values that were below some specified alpha (e.g., .05) threshold.</p>
+<p>We could have a function that would allow you to specify either the
+alpha or power (but maybe not both?)</p>
+<p>This should also work with iterated multiple comparisons</p>
+<p>Maybe do a small simulation study (10 replicates) to figure out how
+long it takes in machine time and clock time to help the user decide how
+much time to dedicate to that?</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG48IS0tIHJuYi1zb3VyY2UtYmVnaW4gZXlKa1lYUmhJam9pWUdCZ2NseHVjMlZoY21Ob1gyWnZjbDl2Y0hScGJXRnNLRnh1SUNCemFXMWZaR1Z6YVdkdVgyUm1MQ0JjYmlBZ2NHOTNaWElnUFNCc2FYTjBLR052Ym1ScGRHbHZibDlCSUQwZ0xqZ3dMQ0JqYjI1a2FYUnBiMjRxZEdsdFpTQTlJQzQyTUNrc0lDTWdkR2hsYzJVZ2MyaHZkV3hrSUdoaGRtVWdkRzhnYldseWNtOXlJSFJvWlNCdVlXMWxjeUJwYmlCaElHSnliMjl0TG0xcGVHVmtJR052YkhWdGJpQm1iM0lnZEdoaGRDQjBaWEp0WEc0Z0lITmhiWEJzWlY5emFYcGxJRDBnYzJWeEtERXdNQ3dnTWpBd0xDQnNaVzVuZEdndWIzVjBJRDBnTlNrc1hHNGdJSEJ5YjJKbFgzQnZhVzUwY3lBOUlEVXNYRzRnSUdGc2NHaGhJRDBnTGpBMUlDTWdibVZsWkNCaElIZGhlU0IwYnlCemNHVmphV1o1SUhSb2FYTWdLR0ZqZEhWaGJHeDVJRzFoZVdKbElIUm9hWE1nYVhNZ2MzQmxZMmxtYVdWa0lHSjVJR3h0WlhJZ1lXeHlaV0ZrZVNsY2JpQWdYRzRnSUNsY2JtQmdZQ0o5IC0tPlxuXG5gYGByXG5zZWFyY2hfZm9yX29wdGltYWwoXG4gIHNpbV9kZXNpZ25fZGYsIFxuICBwb3dlciA9IGxpc3QoY29uZGl0aW9uX0EgPSAuODAsIGNvbmRpdGlvbip0aW1lID0gLjYwKSwgIyB0aGVzZSBzaG91bGQgaGF2ZSB0byBtaXJyb3IgdGhlIG5hbWVzIGluIGEgYnJvb20ubWl4ZWQgY29sdW1uIGZvciB0aGF0IHRlcm1cbiAgc2FtcGxlX3NpemUgPSBzZXEoMTAwLCAyMDAsIGxlbmd0aC5vdXQgPSA1KSxcbiAgcHJvYmVfcG9pbnRzID0gNSxcbiAgYWxwaGEgPSAuMDUgIyBuZWVkIGEgd2F5IHRvIHNwZWNpZnkgdGhpcyAoYWN0dWFsbHkgbWF5YmUgdGhpcyBpcyBzcGVjaWZpZWQgYnkgbG1lciBhbHJlYWR5KVxuICBcbiAgKVxuYGBgXG5cbjwhLS0gcm5iLXNvdXJjZS1lbmQgLS0+XG4ifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2VhcmNoX2Zvcl9vcHRpbWFsKFxuICBzaW1fZGVzaWduX2RmLCBcbiAgcG93ZXIgPSBsaXN0KGNvbmRpdGlvbl9BID0gLjgwLCBjb25kaXRpb24qdGltZSA9IC42MCksICMgdGhlc2Ugc2hvdWxkIGhhdmUgdG8gbWlycm9yIHRoZSBuYW1lcyBpbiBhIGJyb29tLm1peGVkIGNvbHVtbiBmb3IgdGhhdCB0ZXJtXG4gIHNhbXBsZV9zaXplID0gc2VxKDEwMCwgMjAwLCBsZW5ndGgub3V0ID0gNSksXG4gIHByb2JlX3BvaW50cyA9IDUsXG4gIGFscGhhID0gLjA1ICMgbmVlZCBhIHdheSB0byBzcGVjaWZ5IHRoaXMgKGFjdHVhbGx5IG1heWJlIHRoaXMgaXMgc3BlY2lmaWVkIGJ5IGxtZXIgYWxyZWFkeSlcbiAgXG4gIClcbmBgYCJ9 -->
+<pre class="r"><code>search_for_optimal(
+  sim_design_df, 
+  power = list(condition_A = .80, condition*time = .60), # these should have to mirror the names in a broom.mixed column for that term
+  sample_size = seq(100, 200, length.out = 5),
+  probe_points = 5,
+  alpha = .05 # need a way to specify this (actually maybe this is specified by lmer already)
+  
+  )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <p>[X] Make the warnings for the final code block clearer</p>
 <p>[X] Make sure there is is a default for the mean estimate to show up
 in the model summary (and standard deviation of the estimates / standard
@@ -1761,13 +1794,14 @@ error)</p>
 <p>[X] Fix DEPENDS in NAMESPACE so that all of the right sub-packages
 are installed automatically (broom.mixed, lmerTest, pbapply, future).
 Hendricks ran into this problem last time</p>
-<p>[ ] Make some visualization functions, especially one that will
+<p>[X] Make some visualization functions, especially one that will
 illustrate the rollout schedule by cohort</p>
-<p>[ ] See file “Fix this for Hendricks”</p>
+<p>[X] See file “Fix this for Hendricks”</p>
+<p>[ ] See <code>practice plotting.Rmd</code> for specific TODOs</p>
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyBUT0RPOiAKCltYXSBNYWtlIHRoZSB3YXJuaW5ncyBmb3IgdGhlIGZpbmFsIGNvZGUgYmxvY2sgY2xlYXJlcgoKW1hdIE1ha2Ugc3VyZSB0aGVyZSBpcyBpcyBhIGRlZmF1bHQgZm9yIHRoZSBtZWFuIGVzdGltYXRlIHRvIHNob3cgdXAgaW4gdGhlIG1vZGVsIHN1bW1hcnkgKGFuZCBzdGFuZGFyZCBkZXZpYXRpb24gb2YgdGhlIGVzdGltYXRlcyAvIHN0YW5kYXJkIGVycm9yKQoKW1hdIEZpeCBERVBFTkRTIGluIE5BTUVTUEFDRSBzbyB0aGF0IGFsbCBvZiB0aGUgcmlnaHQgc3ViLXBhY2thZ2VzIGFyZSBpbnN0YWxsZWQgYXV0b21hdGljYWxseSAoYnJvb20ubWl4ZWQsIGxtZXJUZXN0LCBwYmFwcGx5LCBmdXR1cmUpLiBIZW5kcmlja3MgcmFuIGludG8gdGhpcyBwcm9ibGVtIGxhc3QgdGltZSAKClsgXSBNYWtlIHNvbWUgdmlzdWFsaXphdGlvbiBmdW5jdGlvbnMsIGVzcGVjaWFsbHkgb25lIHRoYXQgd2lsbCBpbGx1c3RyYXRlIHRoZSByb2xsb3V0IHNjaGVkdWxlIGJ5IGNvaG9ydAoKWyBdIFNlZSBmaWxlICJGaXggdGhpcyBmb3IgSGVuZHJpY2tzIgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyBUT0RPOiAKCkZpbmQgaWRlYWwgc2FtcGxlIHNpemUgKHNlZSBiZWxvdyBmb3IgZXhhbXBsZSBjb2RlKToKLSBNYWtlIGEgZnVuY3Rpb24gdGhhdCBjYW4gdGFrZSBpbiBhIHRhcmdldCBwb3dlciB0aGUgYW5hbHlzdCB3YW50cyBhbmQgcmV0dXJuIGlkZWFsIFNBTVBMRSBTSVpFCi0gSXQgYWxzbyB0YWtlcyBhbiB1cHBlciBhbmQgbG93ZXIgc2FtcGxlIHNpemUgdG8gY29uc2lkZXIsIGFuZCBob3cgbWFueSBpbnRlcnZhbHMgYWxvbmcgdGhlIHdheSAoZS5nLiwgNSkKLSBJdCByZXR1cm5zIGEgZGF0YWZyYW1lLCBidXQgYWxzbyBhIEZJR1VSRSB3aXRoIHRoZSBwb3dlciBjdXJ2ZQotIEl0IHNob3VsZCBtYXliZSBhbHNvIGJlIGFibGUgdG8gdmFyeSAxIHBhcmFtZXRlciBhdCBhIHRpbWUgKGUuZy4sIGVmZmVjdCBzaXplLCBzYW1lIHByb2Nlc3MgYXMgYWJvdmUpCgpBbm90aGVyIHdheSB0byBkbyB0aGlzIChwcm9iYWJseSBmYXN0ZXIpIHdvdWxkIGJlIHRvIGNyZWF0ZSBhIHBvcHVsYXRpb24gd2l0aCBhbiBleGFjdGx5IHplcm8gY29uZGl0aW9uIGVmZmVjdC4gVGhlbiwgaW5zaWRlIHRoYXQgcG9wdWxhdGlvbiwgYXNrIHdoYXQgdGhlIGNyaXRpY2FsIHZhbHVlIGlzIGZvciB0aGUgc21hbGwgZnJhY3Rpb24gb2YgcC12YWx1ZXMgdGhhdCB3ZXJlIGJlbG93IHNvbWUgc3BlY2lmaWVkIGFscGhhIChlLmcuLCAuMDUpIHRocmVzaG9sZC4KCldlIGNvdWxkIGhhdmUgYSBmdW5jdGlvbiB0aGF0IHdvdWxkIGFsbG93IHlvdSB0byBzcGVjaWZ5IGVpdGhlciB0aGUgYWxwaGEgb3IgcG93ZXIgKGJ1dCBtYXliZSBub3QgYm90aD8pCgpUaGlzIHNob3VsZCBhbHNvIHdvcmsgd2l0aCBpdGVyYXRlZCBtdWx0aXBsZSBjb21wYXJpc29ucwoKTWF5YmUgZG8gYSBzbWFsbCBzaW11bGF0aW9uIHN0dWR5ICgxMCByZXBsaWNhdGVzKSB0byBmaWd1cmUgb3V0IGhvdyBsb25nIGl0IHRha2VzIGluIG1hY2hpbmUgdGltZSBhbmQgY2xvY2sgdGltZSB0byBoZWxwIHRoZSB1c2VyIGRlY2lkZSBob3cgbXVjaCB0aW1lIHRvIGRlZGljYXRlIHRvIHRoYXQ/CgoKYGBge3J9CnNlYXJjaF9mb3Jfb3B0aW1hbCgKICBzaW1fZGVzaWduX2RmLCAKICBwb3dlciA9IGxpc3QoY29uZGl0aW9uX0EgPSAuODAsIGNvbmRpdGlvbip0aW1lID0gLjYwKSwgIyB0aGVzZSBzaG91bGQgaGF2ZSB0byBtaXJyb3IgdGhlIG5hbWVzIGluIGEgYnJvb20ubWl4ZWQgY29sdW1uIGZvciB0aGF0IHRlcm0KICBzYW1wbGVfc2l6ZSA9IHNlcSgxMDAsIDIwMCwgbGVuZ3RoLm91dCA9IDUpLAogIHByb2JlX3BvaW50cyA9IDUsCiAgYWxwaGEgPSAuMDUgIyBuZWVkIGEgd2F5IHRvIHNwZWNpZnkgdGhpcyAoYWN0dWFsbHkgbWF5YmUgdGhpcyBpcyBzcGVjaWZpZWQgYnkgbG1lciBhbHJlYWR5KQogIAogICkKYGBgCgoKCgoKCltYXSBNYWtlIHRoZSB3YXJuaW5ncyBmb3IgdGhlIGZpbmFsIGNvZGUgYmxvY2sgY2xlYXJlcgoKW1hdIE1ha2Ugc3VyZSB0aGVyZSBpcyBpcyBhIGRlZmF1bHQgZm9yIHRoZSBtZWFuIGVzdGltYXRlIHRvIHNob3cgdXAgaW4gdGhlIG1vZGVsIHN1bW1hcnkgKGFuZCBzdGFuZGFyZCBkZXZpYXRpb24gb2YgdGhlIGVzdGltYXRlcyAvIHN0YW5kYXJkIGVycm9yKQoKW1hdIEZpeCBERVBFTkRTIGluIE5BTUVTUEFDRSBzbyB0aGF0IGFsbCBvZiB0aGUgcmlnaHQgc3ViLXBhY2thZ2VzIGFyZSBpbnN0YWxsZWQgYXV0b21hdGljYWxseSAoYnJvb20ubWl4ZWQsIGxtZXJUZXN0LCBwYmFwcGx5LCBmdXR1cmUpLiBIZW5kcmlja3MgcmFuIGludG8gdGhpcyBwcm9ibGVtIGxhc3QgdGltZSAKCltYXSBNYWtlIHNvbWUgdmlzdWFsaXphdGlvbiBmdW5jdGlvbnMsIGVzcGVjaWFsbHkgb25lIHRoYXQgd2lsbCBpbGx1c3RyYXRlIHRoZSByb2xsb3V0IHNjaGVkdWxlIGJ5IGNvaG9ydAoKW1hdIFNlZSBmaWxlICJGaXggdGhpcyBmb3IgSGVuZHJpY2tzIgoKWyBdIFNlZSBgcHJhY3RpY2UgcGxvdHRpbmcuUm1kYCBmb3Igc3BlY2lmaWMgVE9ET3MKCgoKCgoKCgoKCgoKCg==</div>
 
 
 

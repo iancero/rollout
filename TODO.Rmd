@@ -5,13 +5,58 @@ output: html_notebook
 
 # TODO: 
 
+Find ideal sample size (see below for example code):
+- Make a function that can take in a target power the analyst wants and return ideal SAMPLE SIZE
+- It also takes an upper and lower sample size to consider, and how many intervals along the way (e.g., 5)
+- It returns a dataframe, but also a FIGURE with the power curve
+- It should maybe also be able to vary 1 parameter at a time (e.g., effect size, same process as above)
+
+Another way to do this (probably faster) would be to create a population with an exactly zero condition effect. Then, inside that population, ask what the critical value is for the small fraction of p-values that were below some specified alpha (e.g., .05) threshold.
+
+We could have a function that would allow you to specify either the alpha or power (but maybe not both?)
+
+This should also work with iterated multiple comparisons
+
+Maybe do a small simulation study (10 replicates) to figure out how long it takes in machine time and clock time to help the user decide how much time to dedicate to that?
+
+
+```{r}
+search_for_optimal(
+  sim_design_df, 
+  power = list(condition_A = .80, condition*time = .60), # these should have to mirror the names in a broom.mixed column for that term
+  sample_size = seq(100, 200, length.out = 5),
+  probe_points = 5,
+  alpha = .05 # need a way to specify this (actually maybe this is specified by lmer already)
+  
+  )
+```
+
+
+
+
+
+
 [X] Make the warnings for the final code block clearer
 
 [X] Make sure there is is a default for the mean estimate to show up in the model summary (and standard deviation of the estimates / standard error)
 
 [X] Fix DEPENDS in NAMESPACE so that all of the right sub-packages are installed automatically (broom.mixed, lmerTest, pbapply, future). Hendricks ran into this problem last time 
 
-[ ] Make some visualization functions, especially one that will illustrate the rollout schedule by cohort
+[X] Make some visualization functions, especially one that will illustrate the rollout schedule by cohort
 
-[ ] See file "Fix this for Hendricks"
+[X] See file "Fix this for Hendricks"
+
+[ ] See `practice plotting.Rmd` for specific TODOs
+
+
+
+
+
+
+
+
+
+
+
+
 

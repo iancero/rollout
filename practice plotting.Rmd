@@ -2,23 +2,60 @@
 title: "Untitled"
 date: "2025-08-29"
 ---
-```{r}
-rollout_schedule
 
-# TODO: put the name of the condition in each cell
+```{r}
+library(tidyverse)
+
+# Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints
+rollout_schedule <- tribble(
+  ~cohort, ~site, ~t1, ~t2, ~t3, ~t4, ~t5, ~t6, ~t7, ~t8,
+       1,    "A",  "ctrl", "ctrl", "really long condition name",  "really long condition name", "intv", "intv", "intv", "intv",
+       1,    "B",  "ctrl", "ctrl", "intv",  "intv", "intv", "intv", "intv", "intv",
+       2,    "C",  "ctrl", "ctrl",  "ctrl", "intv", "intv", "intv", "intv", "intv",
+       2,    "D",  "ctrl", "ctrl",  "ctrl", "intv", "intv", "intv", "intv", "intv",
+       3,    "E",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
+       3,    "F",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
+       4,    "G",  "ctrl", "ctrl", "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv",
+       4,    "H",  "ctrl", "ctrl", "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv"
+)
+
+# Transform to long format for simulation
+long_schedule <- rollout_schedule |>
+  pivot_schedule_longer(time_cols = starts_with("t"))
+
+# Preview structure
+long_schedule |> 
+  head()
+```
+
+
+```{r}
+# TODO: cut off cell label text after 3-4 characters so it doesnt get too big
+
+long_schedule
+
+
+names(long_schedule)
 
 ggplot(long_schedule, aes(x = chron_time, y = site, fill = condition)) +
   geom_tile(width = 0.975, height = 0.95) +
-  facet_wrap(~ factor(cohort, ordered = TRUE), ncol = 1, scales = "free_y") +
-  scale_fill_manual(values = c(ctrl = "grey80", intv = "steelblue")) +
+  geom_text(aes(label = condition), size = 3) + 
+  facet_grid(cohort ~ ., scales = "free_y") +
+  # facet_wrap(~ cohort, ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = c(ctrl = "grey70", intv = "steelblue")) +
   scale_x_continuous(breaks = seq(min(long_schedule$chron_time),
                                 max(long_schedule$chron_time), 1),
                    name = "Timepoint") +
 
-  theme_minimal(base_size = 12) +
+  # theme_minimal(base_size = 12) +
   theme(
+    strip.text = element_text(face = "bold"),
+    strip.background = element_rect(fill = "grey90", color = NA),
+    axis.ticks = element_blank(),
+    legend.position = "none",
     panel.grid = element_blank(),
-    axis.title.y = element_blank()
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(face = "bold")
   )
 ```
 
