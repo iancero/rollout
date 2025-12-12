@@ -86,11 +86,7 @@ schedule <- tibble::tibble(
   t2 = c("intervention", "intervention")
 )
 pivot_schedule_longer(schedule, time_cols = starts_with("t"))
-#> # A tibble: 4 × 5
-#>   site  cohort chron_time condition    local_time
-#>   <chr>  <dbl>      <dbl> <fct>             <dbl>
-#> 1 A          1          1 control               0
-#> 2 A          1          2 intervention          0
-#> 3 B          2          1 intervention          0
-#> 4 B          2          2 intervention          1
+#> Error in dplyr::group_by(schedule, rlang::.data[[cohort_name_char]], rlang::.data[[values_to]]): ℹ In argument: `rlang::.data[[cohort_name_char]]`.
+#> Caused by error in `pivot_schedule_longer()`:
+#> ! Can't subset `.data` outside of a data mask context.
 ```

@@ -75,12 +75,7 @@ extract_model_results(sim_models)
 
 # Extract only the slope term
 extract_model_results(sim_models, .term = "wt")
-#> # A tibble: 5 × 7
-#>      id model  term  estimate std.error statistic  p.value
-#>   <int> <list> <chr>    <dbl>     <dbl>     <dbl>    <dbl>
-#> 1     1 <lm>   wt       -5.34     0.559     -9.56 1.29e-10
-#> 2     2 <lm>   wt       -5.34     0.559     -9.56 1.29e-10
-#> 3     3 <lm>   wt       -5.34     0.559     -9.56 1.29e-10
-#> 4     4 <lm>   wt       -5.34     0.559     -9.56 1.29e-10
-#> 5     5 <lm>   wt       -5.34     0.559     -9.56 1.29e-10
+#> Error in dplyr::filter(results, rlang::.data$term == .term): ℹ In argument: `rlang::.data$term == .term`.
+#> Caused by error in `extract_model_results()`:
+#> ! Can't subset `.data` outside of a data mask context.
 ```
