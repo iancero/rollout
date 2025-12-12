@@ -42,7 +42,13 @@ By following this pipeline, you can efficiently evaluate and optimize your rollo
 
 ## Installing the `rollout` Package
 
-You can install the development version of `rollout` directly from GitHub using the `remotes` package:
+You can install the release version directly from CRAN:
+
+```{r, eval=FALSE}
+install.packages("rollout")
+```
+
+Or, you can install the development version of `rollout` directly from GitHub using the `remotes` package:
 
 ```{r, eval=FALSE}
 # Install remotes package if needed
