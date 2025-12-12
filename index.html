@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>What the Package Does (One Line, Title Case) • rollout</title>
+<title>Tools for Designing, Simulating, and Analyzing Implementation Rollout Trials • rollout</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="What the Package Does (One Line, Title Case)">
-<meta name="description" content="What the package does (one paragraph).">
-<meta property="og:description" content="What the package does (one paragraph).">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Tools for Designing, Simulating, and Analyzing Implementation Rollout Trials">
+<meta name="description" content="Provides a unified framework for designing, simulating, and analyzing implementation rollout trials, including stepped wedge, sequential rollout, head-to-head, multi-condition, and rollout implementation optimization designs. The package enables users to flexibly specify rollout schedules, incorporate site-level and nested data structures, generate outcomes under rich hierarchical models, and evaluate analytic strategies through simulation-based power analysis. By separating data generation from model fitting, the tools support assessment of bias, Type I error, and robustness to model misspecification. The workflow integrates with standard mixed-effects modeling approaches and the tidyverse ecosystem, offering transparent and reproducible tools for implementation scientists and applied statisticians.">
+<meta property="og:description" content="Provides a unified framework for designing, simulating, and analyzing implementation rollout trials, including stepped wedge, sequential rollout, head-to-head, multi-condition, and rollout implementation optimization designs. The package enables users to flexibly specify rollout schedules, incorporate site-level and nested data structures, generate outcomes under rich hierarchical models, and evaluate analytic strategies through simulation-based power analysis. By separating data generation from model fitting, the tools support assessment of bias, Type I error, and robustness to model misspecification. The workflow integrates with standard mixed-effects modeling approaches and the tidyverse ecosystem, offering transparent and reproducible tools for implementation scientists and applied statisticians.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">rollout</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -88,7 +89,10 @@
 <p>We begin by loading the required packages and setting a seed for reproducibility. Throughout this tutorial, we will use the <code>tidyverse</code> for data manipulation and plotting, and the <code>rollout</code> package for design, simulation, and evaluation of rollout trials.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: package 'tidyverse' was built under R version 4.4.3</span></span>
+<span><span class="co">#&gt; Warning: package 'tidyverse' was built under R version 4.5.2</span></span>
+<span><span class="co">#&gt; Warning: package 'ggplot2' was built under R version 4.5.2</span></span>
+<span><span class="co">#&gt; Warning: package 'purrr' was built under R version 4.5.2</span></span>
+<span><span class="co">#&gt; Warning: package 'stringr' was built under R version 4.5.2</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/iancero/rollout" class="external-link">rollout</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1234</span><span class="op">)</span>  <span class="co"># for reproducibility</span></span></code></pre></div>
@@ -109,10 +113,10 @@
 <code class="sourceCode R"><span><span class="co"># Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints</span></span>
 <span><span class="va">rollout_schedule</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">cohort</span>, <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">t1</span>, <span class="op">~</span><span class="va">t2</span>, <span class="op">~</span><span class="va">t3</span>, <span class="op">~</span><span class="va">t4</span>, <span class="op">~</span><span class="va">t5</span>, <span class="op">~</span><span class="va">t6</span>, <span class="op">~</span><span class="va">t7</span>, <span class="op">~</span><span class="va">t8</span>,</span>
-<span>       <span class="fl">1</span>,    <span class="st">"A"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>       <span class="fl">1</span>,    <span class="st">"B"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>       <span class="fl">2</span>,    <span class="st">"C"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
-<span>       <span class="fl">2</span>,    <span class="st">"D"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
+<span>       <span class="fl">1</span>,    <span class="st">"A"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"intv"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
+<span>       <span class="fl">1</span>,    <span class="st">"B"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"intv"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
+<span>       <span class="fl">2</span>,    <span class="st">"C"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"ctrl"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
+<span>       <span class="fl">2</span>,    <span class="st">"D"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"ctrl"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
 <span>       <span class="fl">3</span>,    <span class="st">"E"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
 <span>       <span class="fl">3</span>,    <span class="st">"F"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
 <span>       <span class="fl">4</span>,    <span class="st">"G"</span>,  <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>, <span class="st">"ctrl"</span>,  <span class="st">"intv"</span>, <span class="st">"intv"</span>,</span>
@@ -131,10 +135,10 @@
 <span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1      1 A              1 ctrl               0</span></span>
 <span><span class="co">#&gt; 2      1 A              2 ctrl               1</span></span>
-<span><span class="co">#&gt; 3      1 A              3 ctrl               2</span></span>
-<span><span class="co">#&gt; 4      1 A              4 intv               0</span></span>
-<span><span class="co">#&gt; 5      1 A              5 intv               1</span></span>
-<span><span class="co">#&gt; 6      1 A              6 intv               2</span></span></code></pre></div>
+<span><span class="co">#&gt; 3      1 A              3 intv               0</span></span>
+<span><span class="co">#&gt; 4      1 A              4 intv               1</span></span>
+<span><span class="co">#&gt; 5      1 A              5 intv               2</span></span>
+<span><span class="co">#&gt; 6      1 A              6 intv               3</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="adding-unit-level-information">Adding Unit-Level Information<a class="anchor" aria-label="anchor" href="#adding-unit-level-information"></a>
@@ -208,7 +212,7 @@
 <h2 id="initializing-replicates">Initializing Replicates<a class="anchor" aria-label="anchor" href="#initializing-replicates"></a>
 </h2>
 <p>After adding simulation parameters, we expand our design to include <strong>replicates</strong>. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.</p>
-<p>Here, we initialize <strong>10 replicates</strong> to keep memory usage manageable for demonstration. (In practice, you may use 100+ replicates for stable power estimation.)</p>
+<p>Here, we use 10 replicates to keep the example lightweight. In practice, the number of replicates should be chosen based on the precision you want for your power estimate. A common guideline is: <code>n = p*(1-p)/(se^2)</code>, where <code>se</code> is the desired standard error of the power estimate and <code>p</code> is the target power (for example, p = 0.80).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/initialize_replicates.html">initialize_replicates</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
@@ -316,24 +320,8 @@
 <span></span>
 <span><span class="va">fitted_models</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: lmerTest</span></span>
-<span><span class="co">#&gt; Loading required package: lme4</span></span>
-<span><span class="co">#&gt; Warning: package 'lme4' was built under R version 4.4.2</span></span>
-<span><span class="co">#&gt; Loading required package: Matrix</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'Matrix'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:tidyr':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     expand, pack, unpack</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'lmerTest'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:lme4':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     lmer</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     step</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 4</span></span>
+<span><span class="co">#&gt; Loading required namespace: lmerTest</span></span>
 <span><span class="co">#&gt;   sample_id b_intv data                  model     </span></span>
 <span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;list&gt;                &lt;list&gt;    </span></span>
 <span><span class="co">#&gt; 1         1    0.2 &lt;tibble [1,280 × 14]&gt; &lt;lmrMdLmT&gt;</span></span>
@@ -360,31 +348,23 @@
 <span>    bias <span class="op">=</span> <span class="fu"><a href="reference/eval_bias.html">eval_bias</a></span><span class="op">(</span><span class="va">estimate</span>, term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"(Intercept)"</span> <span class="op">=</span> <span class="fl">0</span>, conditionintv <span class="op">=</span> <span class="va">b_intv</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    critical_val <span class="op">=</span> <span class="fu"><a href="reference/eval_quantile.html">eval_quantile</a></span><span class="op">(</span><span class="va">estimate</span>, term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditionintv"</span> <span class="op">=</span> <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: There were 16 warnings in `dplyr::summarise()`.</span></span>
-<span><span class="co">#&gt; The first warning was:</span></span>
-<span><span class="co">#&gt; ℹ In argument: `bias = eval_bias(estimate, term = c(`(Intercept)` = 0,</span></span>
-<span><span class="co">#&gt;   conditionintv = b_intv))`.</span></span>
-<span><span class="co">#&gt; ℹ In group 2: `b_intv = 0.2` and `term = "chron_time"`.</span></span>
-<span><span class="co">#&gt; Caused by warning:</span></span>
-<span><span class="co">#&gt; ! Term 'chron_time' not found in `term` mapping. Returning NA.</span></span>
-<span><span class="co">#&gt; ℹ Run `dplyr::last_dplyr_warnings()` to see the 15 remaining warnings.</span></span>
 <span></span>
 <span><span class="co"># View summary of bias and power</span></span>
 <span><span class="va">summary_results</span></span>
-<span><span class="co">#&gt; # A tibble: 10 × 6</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 8</span></span>
 <span><span class="co">#&gt; # Groups:   b_intv [2]</span></span>
-<span><span class="co">#&gt;    b_intv term            n_models power   bias critical_val</span></span>
-<span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;              &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1    0.2 (Intercept)           10   0   -0.154       NA    </span></span>
-<span><span class="co">#&gt;  2    0.2 chron_time            10   0.7 NA           NA    </span></span>
-<span><span class="co">#&gt;  3    0.2 conditionintv         10   0.5 NA            0.334</span></span>
-<span><span class="co">#&gt;  4    0.2 sd__(Intercept)       10  NA   NA           NA    </span></span>
-<span><span class="co">#&gt;  5    0.2 sd__Observation       10  NA   NA           NA    </span></span>
-<span><span class="co">#&gt;  6    0.5 (Intercept)           10   0   -0.193       NA    </span></span>
-<span><span class="co">#&gt;  7    0.5 chron_time            10   0.4 NA           NA    </span></span>
-<span><span class="co">#&gt;  8    0.5 conditionintv         10   1   NA            0.663</span></span>
-<span><span class="co">#&gt;  9    0.5 sd__(Intercept)       10  NA   NA           NA    </span></span>
-<span><span class="co">#&gt; 10    0.5 sd__Observation       10  NA   NA           NA</span></span></code></pre></div>
+<span><span class="co">#&gt;    b_intv term   n_models mean_estimate mean_std.error power   bias critical_val</span></span>
+<span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;     &lt;int&gt;         &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1    0.2 (Inte…       10       -0.155          0.207    0   -0.155       NA    </span></span>
+<span><span class="co">#&gt;  2    0.2 chron…       10       -0.0444         0.0207   0.6 NA           NA    </span></span>
+<span><span class="co">#&gt;  3    0.2 condi…       10        0.177          0.102    0.6 NA            0.328</span></span>
+<span><span class="co">#&gt;  4    0.2 sd__(…       10       NA             NA       NA   NA           NA    </span></span>
+<span><span class="co">#&gt;  5    0.2 sd__O…       10       NA             NA       NA   NA           NA    </span></span>
+<span><span class="co">#&gt;  6    0.5 (Inte…       10       -0.192          0.208    0   -0.192       NA    </span></span>
+<span><span class="co">#&gt;  7    0.5 chron…       10       -0.0404         0.0206   0.5 NA           NA    </span></span>
+<span><span class="co">#&gt;  8    0.5 condi…       10        0.484          0.102    1   NA            0.590</span></span>
+<span><span class="co">#&gt;  9    0.5 sd__(…       10       NA             NA       NA   NA           NA    </span></span>
+<span><span class="co">#&gt; 10    0.5 sd__O…       10       NA             NA       NA   NA           NA</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -422,7 +402,8 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>First Last <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/YOUR-ORCID-ID" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Ian Cero <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-2862-0450" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>C. Hendricks Brown <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-0294-2419" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -441,7 +422,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Ian Cero, C. Hendricks Brown.</p>
 </div>
 
 <div class="pkgdown-footer-right">

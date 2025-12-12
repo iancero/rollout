@@ -49,7 +49,10 @@ design, simulation, and evaluation of rollout trials.
 
 ``` r
 library(tidyverse)
-#> Warning: package 'tidyverse' was built under R version 4.4.3
+#> Warning: package 'tidyverse' was built under R version 4.5.2
+#> Warning: package 'ggplot2' was built under R version 4.5.2
+#> Warning: package 'purrr' was built under R version 4.5.2
+#> Warning: package 'stringr' was built under R version 4.5.2
 library(rollout)
 
 set.seed(1234)  # for reproducibility
@@ -72,10 +75,10 @@ We use a `tribble()` for clarity, then convert to long format using
 # Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints
 rollout_schedule <- tribble(
   ~cohort, ~site, ~t1, ~t2, ~t3, ~t4, ~t5, ~t6, ~t7, ~t8,
-       1,    "A",  "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv",
-       1,    "B",  "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv",
-       2,    "C",  "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv", "intv",
-       2,    "D",  "ctrl", "ctrl",  "intv", "intv", "intv", "intv", "intv", "intv",
+       1,    "A",  "ctrl", "ctrl", "intv",  "intv", "intv", "intv", "intv", "intv",
+       1,    "B",  "ctrl", "ctrl", "intv",  "intv", "intv", "intv", "intv", "intv",
+       2,    "C",  "ctrl", "ctrl",  "ctrl", "intv", "intv", "intv", "intv", "intv",
+       2,    "D",  "ctrl", "ctrl",  "ctrl", "intv", "intv", "intv", "intv", "intv",
        3,    "E",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
        3,    "F",  "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv", "intv", "intv",
        4,    "G",  "ctrl", "ctrl", "ctrl", "ctrl", "ctrl", "ctrl",  "intv", "intv",
@@ -94,10 +97,10 @@ long_schedule |>
 #>    <dbl> <chr>      <dbl> <fct>          <dbl>
 #> 1      1 A              1 ctrl               0
 #> 2      1 A              2 ctrl               1
-#> 3      1 A              3 ctrl               2
-#> 4      1 A              4 intv               0
-#> 5      1 A              5 intv               1
-#> 6      1 A              6 intv               2
+#> 3      1 A              3 intv               0
+#> 4      1 A              4 intv               1
+#> 5      1 A              5 intv               2
+#> 6      1 A              6 intv               3
 ```
 
 ## Adding Unit-Level Information
@@ -192,9 +195,11 @@ After adding simulation parameters, we expand our design to include
 **replicates**. This enables us to simulate multiple trials under the
 same design to estimate power and evaluate bias efficiently.
 
-Here, we initialize **10 replicates** to keep memory usage manageable
-for demonstration. (In practice, you may use 100+ replicates for stable
-power estimation.)
+Here, we use 10 replicates to keep the example lightweight. In practice,
+the number of replicates should be chosen based on the precision you
+want for your power estimate. A common guideline is:
+`n = p*(1-p)/(se^2)`, where `se` is the desired standard error of the
+power estimate and `p` is the target power (for example, p = 0.80).
 
 ``` r
 design_df <- design_df |>
@@ -326,24 +331,8 @@ fitted_models <- design_df |>
 
 fitted_models |> 
   head()
-#> Loading required package: lmerTest
-#> Loading required package: lme4
-#> Warning: package 'lme4' was built under R version 4.4.2
-#> Loading required package: Matrix
-#> 
-#> Attaching package: 'Matrix'
-#> The following objects are masked from 'package:tidyr':
-#> 
-#>     expand, pack, unpack
-#> 
-#> Attaching package: 'lmerTest'
-#> The following object is masked from 'package:lme4':
-#> 
-#>     lmer
-#> The following object is masked from 'package:stats':
-#> 
-#>     step
 #> # A tibble: 6 × 4
+#> Loading required namespace: lmerTest
 #>   sample_id b_intv data                  model     
 #>       <int>  <dbl> <list>                <list>    
 #> 1         1    0.2 <tibble [1,280 × 14]> <lmrMdLmT>
@@ -377,29 +366,21 @@ summary_results <- model_results |>
     bias = eval_bias(estimate, term = c("(Intercept)" = 0, conditionintv = b_intv)),
     critical_val = eval_quantile(estimate, term = c("conditionintv" = 0.975))
   )
-#> Warning: There were 16 warnings in `dplyr::summarise()`.
-#> The first warning was:
-#> ℹ In argument: `bias = eval_bias(estimate, term = c(`(Intercept)` = 0,
-#>   conditionintv = b_intv))`.
-#> ℹ In group 2: `b_intv = 0.2` and `term = "chron_time"`.
-#> Caused by warning:
-#> ! Term 'chron_time' not found in `term` mapping. Returning NA.
-#> ℹ Run `dplyr::last_dplyr_warnings()` to see the 15 remaining warnings.
 
 # View summary of bias and power
 summary_results
-#> # A tibble: 10 × 6
+#> # A tibble: 10 × 8
 #> # Groups:   b_intv [2]
-#>    b_intv term            n_models power   bias critical_val
-#>     <dbl> <chr>              <int> <dbl>  <dbl>        <dbl>
-#>  1    0.2 (Intercept)           10   0   -0.154       NA    
-#>  2    0.2 chron_time            10   0.7 NA           NA    
-#>  3    0.2 conditionintv         10   0.5 NA            0.334
-#>  4    0.2 sd__(Intercept)       10  NA   NA           NA    
-#>  5    0.2 sd__Observation       10  NA   NA           NA    
-#>  6    0.5 (Intercept)           10   0   -0.193       NA    
-#>  7    0.5 chron_time            10   0.4 NA           NA    
-#>  8    0.5 conditionintv         10   1   NA            0.663
-#>  9    0.5 sd__(Intercept)       10  NA   NA           NA    
-#> 10    0.5 sd__Observation       10  NA   NA           NA
+#>    b_intv term   n_models mean_estimate mean_std.error power   bias critical_val
+#>     <dbl> <chr>     <int>         <dbl>          <dbl> <dbl>  <dbl>        <dbl>
+#>  1    0.2 (Inte…       10       -0.155          0.207    0   -0.155       NA    
+#>  2    0.2 chron…       10       -0.0444         0.0207   0.6 NA           NA    
+#>  3    0.2 condi…       10        0.177          0.102    0.6 NA            0.328
+#>  4    0.2 sd__(…       10       NA             NA       NA   NA           NA    
+#>  5    0.2 sd__O…       10       NA             NA       NA   NA           NA    
+#>  6    0.5 (Inte…       10       -0.192          0.208    0   -0.192       NA    
+#>  7    0.5 chron…       10       -0.0404         0.0206   0.5 NA           NA    
+#>  8    0.5 condi…       10        0.484          0.102    1   NA            0.590
+#>  9    0.5 sd__(…       10       NA             NA       NA   NA           NA    
+#> 10    0.5 sd__O…       10       NA             NA       NA   NA           NA
 ```

@@ -1,4 +1,4 @@
 # License
 
-    YEAR: 2024
-    COPYRIGHT HOLDER: rollout authors
+    YEAR: 2025
+    COPYRIGHT HOLDER: Ian Cero, C. Hendricks Brown
