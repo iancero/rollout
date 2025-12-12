@@ -42,16 +42,23 @@ extract_model_results <- function(
   model_col <- rlang::enquo(model_col)
 
   results <- models |>
-    dplyr::mutate(.results = purrr::map(rlang::eval_tidy(model_col, models), tidy_fun)) |>
-    tidyr::unnest(.results)
+    dplyr::mutate(
+      .results = purrr::map(
+        .x = rlang::eval_tidy(
+          model_col,
+          data = dplyr::pick(dplyr::everything())),
+        .f = tidy_fun)
+    ) |>
+    tidyr::unnest(cols = ".results")
 
   if (!is.null(.term)) {
     results <- results |>
-      dplyr::filter(term == .term)
+      dplyr::filter(rlang::.data$term == .term)
   }
 
   results
 }
+
 
 
 #' Summarise simulation results from extracted model estimates
@@ -155,7 +162,7 @@ evaluate_model_results <- function(
           rlang::exprs(
             dplyr::across(
               dplyr::all_of(intersect(broom_cols, names(results))),
-              list(mean = mean, sd = sd),
+              list(mean = base::mean, sd = stats::sd),
               .names = "{fn}_{col}"
             )
           )
