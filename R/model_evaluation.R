@@ -35,19 +35,18 @@
 #' @export
 extract_model_results <- function(
     models,
-    model_col = model,
+    model_col = "model",
     tidy_fun = broom.mixed::tidy,
     .term = NULL
 ) {
-  model_col <- rlang::enquo(model_col)
+  model_col <- rlang::ensym(model_col)
 
   results <- models |>
     dplyr::mutate(
       .results = purrr::map(
-        .x = rlang::eval_tidy(
-          model_col,
-          data = dplyr::pick(dplyr::everything())),
-        .f = tidy_fun)
+        .x = rlang::eval_tidy(model_col, data = dplyr::pick(dplyr::everything())),
+        .f = tidy_fun
+      )
     ) |>
     tidyr::unnest(cols = ".results")
 
@@ -58,6 +57,7 @@ extract_model_results <- function(
 
   results
 }
+
 
 
 
@@ -182,6 +182,7 @@ evaluate_model_results <- function(
 #' @param term A named numeric vector providing the true value for each term.
 #' For example, `c("(Intercept)" = 0, x = 2)` to specify the true values for each term.
 #' If `NULL` (default), bias is computed relative to zero.
+#' @param warnings Should warnings be returned?
 #' @param na.rm Logical; whether to remove missing values when computing the mean bias.
 #' Defaults to `FALSE`.
 #'
