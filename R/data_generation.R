@@ -32,22 +32,23 @@ pivot_schedule_longer <- function(schedule,
                                   names_transform = as.numeric,
                                   values_to = "condition",
                                   values_transform = as.factor,
-                                  cohort_name = cohort,
+                                  cohort_name = "cohort",
                                   local_time = TRUE) {
+
+  cohort_name_sym <- rlang::ensym(cohort_name)
+  cohort_name_char <- rlang::as_string(cohort_name_sym)
 
   schedule <- schedule |>
     tidyr::pivot_longer(
       cols = {{ time_cols }},
       names_to = names_to,
       names_pattern = names_pattern,
-      names_transform = setNames(list(names_transform), names_to),
+      names_transform = stats::setNames(list(names_transform), names_to),
       values_to = values_to,
-      values_transform = setNames(list(values_transform), values_to)
+      values_transform = stats::setNames(list(values_transform), values_to)
     )
 
   if (local_time) {
-    cohort_name_char <- rlang::as_name(rlang::enquo(cohort_name))
-
     schedule <- schedule |>
       dplyr::group_by(
         rlang::.data[[cohort_name_char]],
@@ -59,6 +60,7 @@ pivot_schedule_longer <- function(schedule,
 
   schedule
 }
+
 
 
 #' Join unit-level information to a long-format rollout schedule
