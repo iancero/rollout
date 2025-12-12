@@ -13,3 +13,7 @@
 ^development_background_assets$
 ^practice\.qmd$
 ^dev$
+^README_old\.Rmd$
+^TODO\.Rmd$
+^parallel_practice\.Rmd$
+^roio_example_v1_2025-10-24\.Rmd$
