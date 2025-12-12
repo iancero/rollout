@@ -40,22 +40,26 @@ pivot_schedule_longer <- function(schedule,
       cols = {{ time_cols }},
       names_to = names_to,
       names_pattern = names_pattern,
-      names_transform = list(chron_time = names_transform),
+      names_transform = setNames(list(names_transform), names_to),
       values_to = values_to,
-      values_transform = list(condition = values_transform)
+      values_transform = setNames(list(values_transform), values_to)
     )
 
   if (local_time) {
     cohort_name_char <- rlang::as_name(rlang::enquo(cohort_name))
 
     schedule <- schedule |>
-      dplyr::group_by({{ cohort_name }}, condition) |>
-      dplyr::mutate(local_time = row_number() - 1) |>
+      dplyr::group_by(
+        rlang::.data[[cohort_name_char]],
+        rlang::.data[[values_to]]
+      ) |>
+      dplyr::mutate(local_time = dplyr::row_number() - 1L) |>
       dplyr::ungroup()
   }
 
   schedule
 }
+
 
 #' Join unit-level information to a long-format rollout schedule
 #'
@@ -122,9 +126,10 @@ join_info <- function(long_schedule, unit_info, by = NULL,
 #' @export
 initialize_replicates <- function(long_schedule, n) {
   long_schedule |>
-    tidyr::expand_grid(sample_id = seq(n)) |>
-    dplyr::select(sample_id, dplyr::everything())
+    tidyr::expand_grid(sample_id = seq_len(n)) |>
+    dplyr::select("sample_id", dplyr::everything())
 }
+
 
 #' Expand a data frame with parameter combinations for simulation
 #'
