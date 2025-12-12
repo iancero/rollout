@@ -264,6 +264,7 @@ fitted_models <- design_df |>
 fitted_models |> 
   head()
 ```
+
 ## Extracting and Evaluating Results
 
 After fitting the models, we now **extract key results** and **evaluate bias and power** for our intervention effect.
