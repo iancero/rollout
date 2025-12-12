@@ -15,6 +15,8 @@ If \code{NULL} (default), bias is computed relative to zero.}
 
 \item{na.rm}{Logical; whether to remove missing values when computing the mean bias.
 Defaults to \code{FALSE}.}
+
+\item{warnings}{Should warnings be returned?}
 }
 \value{
 A numeric scalar representing the mean bias within the current group.

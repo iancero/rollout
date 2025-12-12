@@ -6,7 +6,7 @@
 \usage{
 extract_model_results(
   models,
-  model_col = model,
+  model_col = "model",
   tidy_fun = broom.mixed::tidy,
   .term = NULL
 )
