@@ -15,7 +15,7 @@ pivot_schedule_longer(
   names_transform = as.numeric,
   values_to = "condition",
   values_transform = as.factor,
-  cohort_name = cohort,
+  cohort_name = "cohort",
   local_time = TRUE
 )
 ```

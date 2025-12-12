@@ -28,6 +28,10 @@ eval_bias(x, term = NULL, na.rm = FALSE, warnings = TRUE)
   Logical; whether to remove missing values when computing the mean
   bias. Defaults to `FALSE`.
 
+- warnings:
+
+  Should warnings be returned?
+
 ## Value
 
 A numeric scalar representing the mean bias within the current group.
