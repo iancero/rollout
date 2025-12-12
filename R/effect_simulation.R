@@ -54,7 +54,7 @@ add_random_effect <- function(design_df, ..., .nesting = NULL) {
   # Apply nesting groups temporarily (if any)
   if (!is.null(.nesting)) {
     design_df <- design_df |>
-      dplyr::group_by(dplyr::across(all_of(.nesting)))
+      dplyr::group_by(dplyr::across(tidyr::all_of(.nesting)))
   }
 
   # Add random effect and restore original grouping
@@ -64,7 +64,7 @@ add_random_effect <- function(design_df, ..., .nesting = NULL) {
   # Restore original grouping
   if (length(original_groups) > 0) {
     design_df <- design_df |>
-      dplyr::group_by(dplyr::across(all_of(original_groups)))
+      dplyr::group_by(dplyr::across(tidyr::all_of(original_groups)))
   } else {
     design_df <- design_df |> dplyr::ungroup()
   }
@@ -93,12 +93,12 @@ add_error <- function(.data, variance = 1) {
 
   .data <- .data |>
     dplyr::ungroup() |>
-    dplyr::mutate(.error = rnorm(n(), sd = sqrt(!!variance)))
+    dplyr::mutate(.error = stats::rnorm(dplyr::n(), sd = sqrt(!!variance)))
 
   # Restore original grouping
   if (length(original_groups) > 0) {
     .data <- .data |>
-      dplyr::group_by(dplyr::across(all_of(original_groups)))
+      dplyr::group_by(dplyr::across(tidyr::all_of(original_groups)))
   }
 
   .data
@@ -125,7 +125,7 @@ add_linear_outcome <- function(data, output_col = "y_linear") {
   }
 
   data |>
-    dplyr::mutate(!!output_col := rowSums(dplyr::pick(all_of(dot_cols))))
+    dplyr::mutate(!!output_col := rowSums(dplyr::pick(tidyr::all_of(dot_cols))))
 }
 
 
@@ -156,9 +156,9 @@ add_binary_outcome <- function(data,
 
   data |>
     dplyr::mutate(
-      !!linear_col := rowSums(dplyr::pick(all_of(dot_cols))),
-      !!prob_col   := plogis(.data[[linear_col]]),
-      !!binary_col := rbinom(dplyr::n(), size = 1, prob = .data[[prob_col]])
+      !!linear_col := rowSums(dplyr::pick(tidyr::all_of(dot_cols))),
+      !!prob_col   := stats::plogis(.data[[linear_col]]),
+      !!binary_col := stats::rbinom(dplyr::n(), size = 1, prob = .data[[prob_col]])
     )
 }
 
@@ -187,9 +187,9 @@ add_poisson_outcome <- function(data,
 
   data |>
     dplyr::mutate(
-      !!linear_col := rowSums(dplyr::pick(all_of(dot_cols))),
+      !!linear_col := rowSums(dplyr::pick(tidyr::all_of(dot_cols))),
       !!rate_col := exp(.data[[linear_col]]),
-      !!count_col := rpois(dplyr::n(), lambda = .data[[rate_col]])
+      !!count_col := stats::rpois(dplyr::n(), lambda = .data[[rate_col]])
     )
 }
 
