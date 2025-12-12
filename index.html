@@ -75,8 +75,11 @@
 <div class="section level2">
 <h2 id="installing-the-rollout-package">Installing the <code>rollout</code> Package<a class="anchor" aria-label="anchor" href="#installing-the-rollout-package"></a>
 </h2>
-<p>You can install the development version of <code>rollout</code> directly from GitHub using the <code>remotes</code> package:</p>
+<p>You can install the release version directly from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rollout"</span><span class="op">)</span></span></code></pre></div>
+<p>Or, you can install the development version of <code>rollout</code> directly from GitHub using the <code>remotes</code> package:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Install remotes package if needed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span></span>
@@ -87,7 +90,7 @@
 <h2 id="setup-and-package-loading">Setup and Package Loading<a class="anchor" aria-label="anchor" href="#setup-and-package-loading"></a>
 </h2>
 <p>We begin by loading the required packages and setting a seed for reproducibility. Throughout this tutorial, we will use the <code>tidyverse</code> for data manipulation and plotting, and the <code>rollout</code> package for design, simulation, and evaluation of rollout trials.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: package 'tidyverse' was built under R version 4.5.2</span></span>
 <span><span class="co">#&gt; Warning: package 'ggplot2' was built under R version 4.5.2</span></span>
@@ -109,7 +112,7 @@
 <li>Each cohort transitions to the intervention (<code>"intv"</code>) at a different time while data are collected continuously.</li>
 </ul>
 <p>We use a <code>tribble()</code> for clarity, then convert to long format using <code><a href="reference/pivot_schedule_longer.html">pivot_schedule_longer()</a></code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints</span></span>
 <span><span class="va">rollout_schedule</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">cohort</span>, <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">t1</span>, <span class="op">~</span><span class="va">t2</span>, <span class="op">~</span><span class="va">t3</span>, <span class="op">~</span><span class="va">t4</span>, <span class="op">~</span><span class="va">t5</span>, <span class="op">~</span><span class="va">t6</span>, <span class="op">~</span><span class="va">t7</span>, <span class="op">~</span><span class="va">t8</span>,</span>
@@ -143,9 +146,9 @@
 <div class="section level2">
 <h2 id="adding-unit-level-information">Adding Unit-Level Information<a class="anchor" aria-label="anchor" href="#adding-unit-level-information"></a>
 </h2>
-<p>Next, we specify the <strong>unit-level information</strong> for each site, which is sometimes available in advance of a trial. For this example, each site will have a <strong>slightly different number of units</strong>, reflecting real-world differences in site sizes.</p>
+<p>Next, we specify the <strong>unit-level information</strong> for each site, which is sometimes available in advance of a trial. For this example, each site will have a slightly different number of units, reflecting real-world differences in site sizes.</p>
 <p>We will then join this information to our long-format rollout schedule using <code><a href="reference/join_info.html">join_info()</a></code>. This will expand the dataset to include a row for each unit at each timepoint.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create unit-level information with variable site sizes</span></span>
 <span><span class="va">unit_info</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">site</span>, <span class="op">~</span><span class="va">n_units</span>,</span>
@@ -184,9 +187,9 @@
 <div class="section level2">
 <h2 id="adding-simulation-parameters">Adding Simulation Parameters<a class="anchor" aria-label="anchor" href="#adding-simulation-parameters"></a>
 </h2>
-<p>We will now add <strong>simulation parameters</strong> to our design. A key advantage of <code>rollout</code> is the ability to expand a parameter grid, enabling the evaluation of <strong>multiple scenarios</strong> within the same simulation pipeline.</p>
-<p>In this example: - We will evaluate <strong>two intervention effect sizes</strong> (<code>b_intv = 0.2</code> for a small effect, <code>b_intv = 0.5</code> for a moderate effect). - We will specify a constant <strong>site-level standard deviation (<code>sigma_site = 0.5</code>)</strong> and <strong>unit-level residual standard deviation (<code>sigma_unit = 1</code>)</strong>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>We will now add <strong>simulation parameters</strong> to our design. A key advantage of <code>rollout</code> is the ability to expand a parameter grid, enabling the evaluation of multiple scenarios within the same simulation pipeline.</p>
+<p>In this example: - We will evaluate two intervention effect sizes (<code>b_intv = 0.2</code> for a small effect, <code>b_intv = 0.5</code> for a moderate effect). - We will specify a constant site-level standard deviation (<code>sigma_site = 0.5</code>) and unit-level residual standard deviation (<code>sigma_unit = 1</code>).</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/add_parameter.html">add_parameter</a></span><span class="op">(</span></span>
 <span>    b_intv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
@@ -211,9 +214,9 @@
 <div class="section level2">
 <h2 id="initializing-replicates">Initializing Replicates<a class="anchor" aria-label="anchor" href="#initializing-replicates"></a>
 </h2>
-<p>After adding simulation parameters, we expand our design to include <strong>replicates</strong>. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.</p>
+<p>After adding simulation parameters, we expand our design to include replicates. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.</p>
 <p>Here, we use 10 replicates to keep the example lightweight. In practice, the number of replicates should be chosen based on the precision you want for your power estimate. A common guideline is: <code>n = p*(1-p)/(se^2)</code>, where <code>se</code> is the desired standard error of the power estimate and <code>p</code> is the target power (for example, p = 0.80).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/initialize_replicates.html">initialize_replicates</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
@@ -235,12 +238,11 @@
 <h2 id="simulating-outcomes">Simulating Outcomes<a class="anchor" aria-label="anchor" href="#simulating-outcomes"></a>
 </h2>
 <p>We now simulate the outcome data according to our specified design. This prepares the dataset for model fitting, power estimation, and bias evaluation.</p>
-<hr>
 <div class="section level3">
 <h3 id="adding-a-fixed-time-trend">Adding a Fixed Time Trend<a class="anchor" aria-label="anchor" href="#adding-a-fixed-time-trend"></a>
 </h3>
-<p>First, we add a <strong>small negative time trend</strong> (<code>b_time = -0.05</code>) to represent gradual improvement over time, independent of intervention.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>First, we add a small negative time trend (<code>b_time = -0.05</code>) to represent gradual improvement over time, independent of intervention.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/add_parameter.html">add_parameter</a></span><span class="op">(</span>b_time <span class="op">=</span> <span class="op">-</span><span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -248,7 +250,7 @@
 <h3 id="adding-fixed-effects">Adding Fixed Effects<a class="anchor" aria-label="anchor" href="#adding-fixed-effects"></a>
 </h3>
 <p>Next, we add fixed effects for: - The intervention effect, applied when <code>condition == "intv"</code>. - The time trend, scaled by <code>chron_time</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/add_fixed_effect.html">add_fixed_effect</a></span><span class="op">(</span></span>
 <span>    intv_effect <span class="op">=</span> <span class="va">b_intv</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"intv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -259,7 +261,7 @@
 <h3 id="adding-random-intercepts-for-sites">Adding Random Intercepts for Sites<a class="anchor" aria-label="anchor" href="#adding-random-intercepts-for-sites"></a>
 </h3>
 <p>We add a random intercept at the site level to simulate between-site variability.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/add_random_effect.html">add_random_effect</a></span><span class="op">(</span></span>
 <span>    site_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="va">sigma_site</span><span class="op">)</span>,</span>
@@ -270,7 +272,7 @@
 <h3 id="adding-unit-level-residual-error">Adding Unit-Level Residual Error<a class="anchor" aria-label="anchor" href="#adding-unit-level-residual-error"></a>
 </h3>
 <p>We add unit-level residual error with variance <code>sigma_unit^2</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/add_error.html">add_error</a></span><span class="op">(</span>variance <span class="op">=</span> <span class="va">sigma_unit</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -278,7 +280,7 @@
 <h3 id="generating-the-linear-outcome">Generating the Linear Outcome<a class="anchor" aria-label="anchor" href="#generating-the-linear-outcome"></a>
 </h3>
 <p>Finally, we generate a linear outcome (y_linear) by summing all fixed, random, and error components.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design_df</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/add_linear_outcome.html">add_linear_outcome</a></span><span class="op">(</span>output_col <span class="op">=</span> <span class="st">"y_linear"</span><span class="op">)</span></span>
 <span></span>
@@ -302,11 +304,11 @@
 <div class="section level2">
 <h2 id="fitting-models-across-replicates">Fitting Models Across Replicates<a class="anchor" aria-label="anchor" href="#fitting-models-across-replicates"></a>
 </h2>
-<p>With our simulated outcomes generated, we now fit our <strong>planned analysis model</strong> across all replicates and parameter scenarios.</p>
+<p>With our simulated outcomes generated, we now fit our planned analysis model across all replicates and parameter scenarios.</p>
 <p>This process is automatically conducted in parallel, but you’ll need to load any packages for that parallel process explicitly (see line <code>packages = "lmerTest"</code>).</p>
-<p>In this example: - We use <strong>linear mixed-effects models</strong> to account for site-level clustering. - Our model includes: - <code>condition</code> (intervention vs control), - <code>chron_time</code> (continuous time trend), - A random intercept for <code>site</code>. - We group by <code>sample_id</code> (replicates) and <code>b_intv</code> (effect size scenario).</p>
-<p>This approach allows us to evaluate <strong>bias and power</strong> across both <strong>replicates</strong> and <strong>effect size conditions</strong>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p>In this example: - We use linear mixed-effects models to account for site-level clustering. - Our model includes: - <code>condition</code> (intervention vs control), - <code>chron_time</code> (continuous time trend), - A random intercept for <code>site</code>. - We group by <code>sample_id</code> (replicates) and <code>b_intv</code> (effect size scenario).</p>
+<p>This approach allows us to evaluate bias and power across both replicates and effect size conditions.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitted_models</span> <span class="op">&lt;-</span> <span class="va">design_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">b_intv</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">nest</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -334,9 +336,9 @@
 <div class="section level2">
 <h2 id="extracting-and-evaluating-results">Extracting and Evaluating Results<a class="anchor" aria-label="anchor" href="#extracting-and-evaluating-results"></a>
 </h2>
-<p>After fitting the models, we now <strong>extract key results</strong> and <strong>evaluate bias and power</strong> for our intervention effect.</p>
+<p>After fitting the models, we now extract key results and evaluate bias and power for our intervention effect.</p>
 <p>We will: - <strong>Extract model estimates</strong> using <code><a href="reference/extract_model_results.html">extract_model_results()</a></code>. - <strong>Summarize power</strong> by calculating the proportion of p-values below .05 (done by default in <code>evaluate_model_results). - **Summarize bias** of the intervention effect using</code>eval_bias()<code>. - **Estimate a critical value** by calculating the observed value of b-estimates above the 97.5th percentile, using</code>eval_quantile()`.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract tidy model results</span></span>
 <span><span class="va">model_results</span> <span class="op">&lt;-</span> <span class="va">fitted_models</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/extract_model_results.html">extract_model_results</a></span><span class="op">(</span><span class="op">)</span></span>
