@@ -105,7 +105,7 @@ long_schedule |>
 
 ## Adding Unit-Level Information
 
-Next, we specify the **unit-level information** for each site, which is sometimes available in advance of a trial. For this example, each site will have a **slightly different number of units**, reflecting real-world differences in site sizes.
+Next, we specify the **unit-level information** for each site, which is sometimes available in advance of a trial. For this example, each site will have a slightly different number of units, reflecting real-world differences in site sizes.
 
 We will then join this information to our long-format rollout schedule using `join_info()`. This will expand the dataset to include a row for each unit at each timepoint.
 
@@ -140,11 +140,11 @@ design_df |>
 
 ## Adding Simulation Parameters
 
-We will now add **simulation parameters** to our design. A key advantage of `rollout` is the ability to expand a parameter grid, enabling the evaluation of **multiple scenarios** within the same simulation pipeline.
+We will now add **simulation parameters** to our design. A key advantage of `rollout` is the ability to expand a parameter grid, enabling the evaluation of multiple scenarios within the same simulation pipeline.
 
 In this example:
-- We will evaluate **two intervention effect sizes** (`b_intv = 0.2` for a small effect, `b_intv = 0.5` for a moderate effect).
-- We will specify a constant **site-level standard deviation (`sigma_site = 0.5`)** and **unit-level residual standard deviation (`sigma_unit = 1`)**.
+- We will evaluate two intervention effect sizes (`b_intv = 0.2` for a small effect, `b_intv = 0.5` for a moderate effect).
+- We will specify a constant site-level standard deviation (`sigma_site = 0.5`) and unit-level residual standard deviation (`sigma_unit = 1`).
 
 ```{r add-parameters}
 design_df <- design_df |>
@@ -162,7 +162,7 @@ design_df |>
 
 ## Initializing Replicates
 
-After adding simulation parameters, we expand our design to include **replicates**. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.
+After adding simulation parameters, we expand our design to include replicates. This enables us to simulate multiple trials under the same design to estimate power and evaluate bias efficiently.
 
 Here, we use 10 replicates to keep the example lightweight. In practice, the number of replicates should be chosen based on the precision you want for your power estimate. A common guideline is: `n = p*(1-p)/(se^2)`, where `se` is the desired standard error of the power estimate and `p` is the target power (for example, p = 0.80). 
 
@@ -179,11 +179,11 @@ design_df |>
 
 We now simulate the outcome data according to our specified design. This prepares the dataset for model fitting, power estimation, and bias evaluation.
 
----
+
 
 ### Adding a Fixed Time Trend
 
-First, we add a **small negative time trend** (`b_time = -0.05`) to represent gradual improvement over time, independent of intervention.
+First, we add a small negative time trend (`b_time = -0.05`) to represent gradual improvement over time, independent of intervention.
 
 ```{r add-time-trend}
 design_df <- design_df |>
@@ -241,19 +241,19 @@ design_df |>
 
 ## Fitting Models Across Replicates
 
-With our simulated outcomes generated, we now fit our **planned analysis model** across all replicates and parameter scenarios.
+With our simulated outcomes generated, we now fit our planned analysis model across all replicates and parameter scenarios.
 
 This process is automatically conducted in parallel, but you'll need to load any packages for that parallel process explicitly (see line `packages = "lmerTest"`).
 
 In this example:
-- We use **linear mixed-effects models** to account for site-level clustering.
+- We use linear mixed-effects models to account for site-level clustering.
 - Our model includes:
     - `condition` (intervention vs control),
     - `chron_time` (continuous time trend),
     - A random intercept for `site`.
 - We group by `sample_id` (replicates) and `b_intv` (effect size scenario).
 
-This approach allows us to evaluate **bias and power** across both **replicates** and **effect size conditions**.
+This approach allows us to evaluate bias and power across both replicates and effect size conditions.
 
 ```{r fit-models}
 fitted_models <- design_df |>
@@ -273,7 +273,7 @@ fitted_models |>
 
 ## Extracting and Evaluating Results
 
-After fitting the models, we now **extract key results** and **evaluate bias and power** for our intervention effect.
+After fitting the models, we now extract key results and evaluate bias and power for our intervention effect.
 
 We will:
 - **Extract model estimates** using `extract_model_results()`.
