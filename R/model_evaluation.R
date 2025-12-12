@@ -134,17 +134,20 @@ evaluate_model_results <- function(
     dplyr::summarise(
       n_models = dplyr::n(),
       mean_estimate = dplyr::if_else(
-        condition = all(is.na(p.value)),
+        condition = all(is.na(rlang::.data$p.value)),
         true = NA_real_,
-        false = mean(estimate, na.rm = TRUE)),
+        false = mean(rlang::.data$estimate, na.rm = TRUE)
+      ),
       mean_std.error = dplyr::if_else(
-        condition = all(is.na(p.value)),
+        condition = all(is.na(rlang::.data$p.value)),
         true = NA_real_,
-        false = mean(std.error, na.rm = TRUE)),
+        false = mean(rlang::.data$std.error, na.rm = TRUE)
+      ),
       power = dplyr::if_else(
-        condition = all(is.na(p.value)),
+        condition = all(is.na(rlang::.data$p.value)),
         true = NA_real_,
-        false = mean(p.value < alpha, na.rm = TRUE)),
+        false = mean(rlang::.data$p.value < alpha, na.rm = TRUE)
+      ),
       # power_std.error = sqrt(power*(1-power)/n_models),
       !!!summary_exprs,
       !!!{
@@ -162,7 +165,6 @@ evaluate_model_results <- function(
       }
     )
 }
-
 
 #' Compute bias relative to term-specific true values within grouped simulation results
 #'
