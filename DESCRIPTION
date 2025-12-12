@@ -17,7 +17,6 @@ URL: https://github.com/iancero/rollout,
 BugReports: https://github.com/iancero/rollout/issues
 Imports: 
     broom.mixed,
-    cli,
     dplyr,
     glue,
     lifecycle,
