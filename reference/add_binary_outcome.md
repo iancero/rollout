@@ -43,5 +43,12 @@ columns.
 ``` r
 df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
 add_binary_outcome(df)
-#> Error in data %>% dplyr::mutate(`:=`(!!linear_col, rowSums(dplyr::pick(all_of(dot_cols)))),     `:=`(!!prob_col, plogis(.data[[linear_col]])), `:=`(!!binary_col,         rbinom(dplyr::n(), size = 1, prob = .data[[prob_col]]))): could not find function "%>%"
+#> # A tibble: 5 × 6
+#>   .beta       .u .error y_linear y_prob y_bin
+#>   <dbl>    <dbl>  <dbl>    <dbl>  <dbl> <int>
+#> 1   0.5  0.255   -1.82    -1.07   0.256     0
+#> 2   0.5 -2.44    -0.247   -2.18   0.101     0
+#> 3   0.5 -0.00557 -0.244    0.250  0.562     0
+#> 4   0.5  0.622   -0.283    0.839  0.698     0
+#> 5   0.5  1.15    -0.554    1.09   0.749     1
 ```

@@ -28,5 +28,12 @@ A `tibble` with an added `.error` column.
 ``` r
 df <- tibble::tibble(x = 1:5)
 add_error(df, variance = 2)
-#> Error in .data %>% dplyr::ungroup() %>% dplyr::mutate(.error = rnorm(n(),     sd = sqrt(!!variance))): could not find function "%>%"
+#> # A tibble: 5 × 2
+#>       x .error
+#>   <int>  <dbl>
+#> 1     1  0.695
+#> 2     2 -1.07 
+#> 3     3  0.494
+#> 4     4 -0.242
+#> 5     5  2.31 
 ```

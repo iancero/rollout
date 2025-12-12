@@ -34,5 +34,13 @@ A `tibble` with the added random effect column.
 ``` r
 df <- tibble::tibble(site = rep(1:2, each = 3))
 add_random_effect(df, u = rnorm(1, 0, 1), .nesting = "site")
-#> Error in design_df %>% dplyr::group_by(dplyr::across(all_of(.nesting))): could not find function "%>%"
+#> # A tibble: 6 × 2
+#>    site      .u
+#>   <int>   <dbl>
+#> 1     1 -0.206 
+#> 2     1 -0.206 
+#> 3     1 -0.206 
+#> 4     2  0.0192
+#> 5     2  0.0192
+#> 6     2  0.0192
 ```

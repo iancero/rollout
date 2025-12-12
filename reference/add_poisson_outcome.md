@@ -42,5 +42,12 @@ A `tibble` with added linear predictor, rate, and count columns.
 ``` r
 df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
 add_poisson_outcome(df)
-#> Error in data %>% dplyr::mutate(`:=`(!!linear_col, rowSums(dplyr::pick(all_of(dot_cols)))),     `:=`(!!rate_col, exp(.data[[linear_col]])), `:=`(!!count_col,         rpois(dplyr::n(), lambda = .data[[rate_col]]))): could not find function "%>%"
+#> # A tibble: 5 × 6
+#>   .beta     .u .error y_linear y_rate y_count
+#>   <dbl>  <dbl>  <dbl>    <dbl>  <dbl>   <int>
+#> 1   0.5  0.151 -0.795   -0.145  0.865       2
+#> 2   0.5 -0.293 -1.57    -1.36   0.257       0
+#> 3   0.5  0.255 -1.04    -0.286  0.752       0
+#> 4   0.5 -0.553  1.02     0.967  2.63        4
+#> 5   0.5  1.41  -0.702    1.20   3.33        5
 ```

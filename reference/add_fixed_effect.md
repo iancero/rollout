@@ -29,5 +29,12 @@ A `tibble` with the added fixed effect column.
 ``` r
 df <- tibble::tibble(x = rnorm(5))
 add_fixed_effect(df, beta = 0.5 * x)
-#> Error in design_df %>% dplyr::mutate(`:=`(!!var_name, !!var_expr)): could not find function "%>%"
+#> # A tibble: 5 × 2
+#>          x    .beta
+#>      <dbl>    <dbl>
+#> 1 -0.00289 -0.00145
+#> 2  0.413    0.207  
+#> 3  0.724    0.362  
+#> 4  2.35     1.18   
+#> 5 -0.281   -0.141  
 ```
