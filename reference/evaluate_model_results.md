@@ -81,36 +81,44 @@ sim_models <- tibble(
 # Evaluate power and mean estimate for the slope
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     alpha = 0.05,
     mean_estimate = mean(estimate, na.rm = TRUE),
     sd_estimate = sd(estimate, na.rm = TRUE)
   )
-#> Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),     true = NA_real_, false = mean(rlang::.data$estimate, na.rm = TRUE)),     mean_std.error = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$std.error,             na.rm = TRUE)), power = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$p.value <             alpha, na.rm = TRUE)), !!!summary_exprs, !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = base::mean, sd = stats::sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }): ℹ In argument: `mean_estimate = dplyr::if_else(...)`.
-#> Caused by error in `evaluate_model_results()`:
-#> ! Can't subset `.data` outside of a data mask context.
+#> # A tibble: 1 × 6
+#>   term  n_models mean_estimate mean_std.error power sd_estimate
+#>   <chr>    <int>         <dbl>          <dbl> <dbl>       <dbl>
+#> 1 wt          50         -5.34          0.559     1           0
 
 # Evaluate with .summarise_standard_broom = TRUE
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     .summarise_standard_broom = TRUE
   )
-#> Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),     true = NA_real_, false = mean(rlang::.data$estimate, na.rm = TRUE)),     mean_std.error = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$std.error,             na.rm = TRUE)), power = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$p.value <             alpha, na.rm = TRUE)), !!!summary_exprs, !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = base::mean, sd = stats::sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }): ℹ In argument: `mean_estimate = dplyr::if_else(...)`.
-#> Caused by error in `evaluate_model_results()`:
-#> ! Can't subset `.data` outside of a data mask context.
+#> # A tibble: 1 × 11
+#>   term  n_models mean_estimate mean_std.error power sd_estimate sd_std.error
+#>   <chr>    <int>         <dbl>          <dbl> <dbl>       <dbl>        <dbl>
+#> 1 wt          50         -5.34          0.559     1           0            0
+#> # ℹ 4 more variables: mean_statistic <dbl>, sd_statistic <dbl>,
+#> #   mean_p.value <dbl>, sd_p.value <dbl>
 
 # Evaluate with eval_bias to compute bias relative to the true value
 # Suppose the true slope of wt is -5 (hypothetical)
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     bias = eval_bias(
       estimate,
       term = c("wt" = -5)
     )
   )
-#> Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),     true = NA_real_, false = mean(rlang::.data$estimate, na.rm = TRUE)),     mean_std.error = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$std.error,             na.rm = TRUE)), power = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$p.value <             alpha, na.rm = TRUE)), !!!summary_exprs, !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = base::mean, sd = stats::sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }): ℹ In argument: `mean_estimate = dplyr::if_else(...)`.
-#> Caused by error in `evaluate_model_results()`:
-#> ! Can't subset `.data` outside of a data mask context.
+#> # A tibble: 1 × 6
+#>   term  n_models mean_estimate mean_std.error power   bias
+#>   <chr>    <int>         <dbl>          <dbl> <dbl>  <dbl>
+#> 1 wt          50         -5.34          0.559     1 -0.344
 ```

@@ -100,7 +100,7 @@ long_schedule |>
   head()
 #> # A tibble: 6 × 5
 #>   cohort site  chron_time condition local_time
-#>    <dbl> <chr>      <dbl> <fct>          <dbl>
+#>    <dbl> <chr>      <dbl> <fct>          <int>
 #> 1      1 A              1 ctrl               0
 #> 2      1 A              2 ctrl               1
 #> 3      1 A              3 intv               0
@@ -150,7 +150,7 @@ design_df |>
   head()
 #> # A tibble: 6 × 6
 #>   cohort site  chron_time condition local_time unit_id
-#>    <dbl> <chr>      <dbl> <fct>          <dbl>   <int>
+#>    <dbl> <chr>      <dbl> <fct>          <int>   <int>
 #> 1      1 A              1 ctrl               0       1
 #> 2      1 A              1 ctrl               0       2
 #> 3      1 A              1 ctrl               0       3
@@ -184,7 +184,7 @@ design_df |>
   head()
 #> # A tibble: 6 × 9
 #>   cohort site  chron_time condition local_time unit_id b_intv sigma_site
-#>    <dbl> <chr>      <dbl> <fct>          <dbl>   <int>  <dbl>      <dbl>
+#>    <dbl> <chr>      <dbl> <fct>          <int>   <int>  <dbl>      <dbl>
 #> 1      1 A              1 ctrl               0       1    0.2        0.5
 #> 2      1 A              1 ctrl               0       1    0.5        0.5
 #> 3      1 A              1 ctrl               0       2    0.2        0.5
@@ -215,7 +215,7 @@ design_df |>
   head()
 #> # A tibble: 6 × 10
 #>   sample_id cohort site  chron_time condition local_time unit_id b_intv
-#>       <int>  <dbl> <chr>      <dbl> <fct>          <dbl>   <int>  <dbl>
+#>       <int>  <dbl> <chr>      <dbl> <fct>          <int>   <int>  <dbl>
 #> 1         1      1 A              1 ctrl               0       1    0.2
 #> 2         2      1 A              1 ctrl               0       1    0.2
 #> 3         3      1 A              1 ctrl               0       1    0.2
@@ -290,7 +290,7 @@ design_df |>
   head()
 #> # A tibble: 6 × 16
 #>   sample_id cohort site  chron_time condition local_time unit_id b_intv
-#>       <int>  <dbl> <chr>      <dbl> <fct>          <dbl>   <int>  <dbl>
+#>       <int>  <dbl> <chr>      <dbl> <fct>          <int>   <int>  <dbl>
 #> 1         1      1 A              1 ctrl               0       1    0.2
 #> 2         2      1 A              1 ctrl               0       1    0.2
 #> 3         3      1 A              1 ctrl               0       1    0.2
@@ -376,16 +376,16 @@ summary_results
 #> # Groups:   b_intv [2]
 #>    b_intv term   n_models mean_estimate mean_std.error power   bias critical_val
 #>     <dbl> <chr>     <int>         <dbl>          <dbl> <dbl>  <dbl>        <dbl>
-#>  1    0.2 (Inte…       10       -0.155          0.207    0   -0.155       NA    
-#>  2    0.2 chron…       10       -0.0444         0.0207   0.6 NA           NA    
-#>  3    0.2 condi…       10        0.177          0.102    0.6 NA            0.328
-#>  4    0.2 sd__(…       10       NA             NA       NA   NA           NA    
-#>  5    0.2 sd__O…       10       NA             NA       NA   NA           NA    
-#>  6    0.5 (Inte…       10       -0.192          0.208    0   -0.192       NA    
-#>  7    0.5 chron…       10       -0.0404         0.0206   0.5 NA           NA    
-#>  8    0.5 condi…       10        0.484          0.102    1   NA            0.590
-#>  9    0.5 sd__(…       10       NA             NA       NA   NA           NA    
-#> 10    0.5 sd__O…       10       NA             NA       NA   NA           NA
+#>  1    0.2 (Inte…       10         0.333          0.110  0.45 -0.155       NA    
+#>  2    0.2 chron…       10         0.333          0.110  0.45 NA           NA    
+#>  3    0.2 condi…       10         0.333          0.110  0.45 NA            0.328
+#>  4    0.2 sd__(…       10         0.333          0.110  0.45 NA           NA    
+#>  5    0.2 sd__O…       10         0.333          0.110  0.45 NA           NA    
+#>  6    0.5 (Inte…       10         0.333          0.110  0.45 -0.192       NA    
+#>  7    0.5 chron…       10         0.333          0.110  0.45 NA           NA    
+#>  8    0.5 condi…       10         0.333          0.110  0.45 NA            0.590
+#>  9    0.5 sd__(…       10         0.333          0.110  0.45 NA           NA    
+#> 10    0.5 sd__O…       10         0.333          0.110  0.45 NA           NA
 ```
 
 # Package index

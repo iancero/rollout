@@ -135,7 +135,7 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 5</span></span>
 <span><span class="co">#&gt;   cohort site  chron_time condition local_time</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;int&gt;</span></span>
 <span><span class="co">#&gt; 1      1 A              1 ctrl               0</span></span>
 <span><span class="co">#&gt; 2      1 A              2 ctrl               1</span></span>
 <span><span class="co">#&gt; 3      1 A              3 intv               0</span></span>
@@ -176,7 +176,7 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 6</span></span>
 <span><span class="co">#&gt;   cohort site  chron_time condition local_time unit_id</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;int&gt;   &lt;int&gt;</span></span>
 <span><span class="co">#&gt; 1      1 A              1 ctrl               0       1</span></span>
 <span><span class="co">#&gt; 2      1 A              1 ctrl               0       2</span></span>
 <span><span class="co">#&gt; 3      1 A              1 ctrl               0       3</span></span>
@@ -202,7 +202,7 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 9</span></span>
 <span><span class="co">#&gt;   cohort site  chron_time condition local_time unit_id b_intv sigma_site</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;int&gt;   &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1      1 A              1 ctrl               0       1    0.2        0.5</span></span>
 <span><span class="co">#&gt; 2      1 A              1 ctrl               0       1    0.5        0.5</span></span>
 <span><span class="co">#&gt; 3      1 A              1 ctrl               0       2    0.2        0.5</span></span>
@@ -225,7 +225,7 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 10</span></span>
 <span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time unit_id b_intv</span></span>
-<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;int&gt;   &lt;int&gt;  &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1         1      1 A              1 ctrl               0       1    0.2</span></span>
 <span><span class="co">#&gt; 2         2      1 A              1 ctrl               0       1    0.2</span></span>
 <span><span class="co">#&gt; 3         3      1 A              1 ctrl               0       1    0.2</span></span>
@@ -289,7 +289,7 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 16</span></span>
 <span><span class="co">#&gt;   sample_id cohort site  chron_time condition local_time unit_id b_intv</span></span>
-<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;fct&gt;          &lt;int&gt;   &lt;int&gt;  &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1         1      1 A              1 ctrl               0       1    0.2</span></span>
 <span><span class="co">#&gt; 2         2      1 A              1 ctrl               0       1    0.2</span></span>
 <span><span class="co">#&gt; 3         3      1 A              1 ctrl               0       1    0.2</span></span>
@@ -357,16 +357,16 @@
 <span><span class="co">#&gt; # Groups:   b_intv [2]</span></span>
 <span><span class="co">#&gt;    b_intv term   n_models mean_estimate mean_std.error power   bias critical_val</span></span>
 <span><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;     &lt;int&gt;         &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1    0.2 (Inte…       10       -0.155          0.207    0   -0.155       NA    </span></span>
-<span><span class="co">#&gt;  2    0.2 chron…       10       -0.0444         0.0207   0.6 NA           NA    </span></span>
-<span><span class="co">#&gt;  3    0.2 condi…       10        0.177          0.102    0.6 NA            0.328</span></span>
-<span><span class="co">#&gt;  4    0.2 sd__(…       10       NA             NA       NA   NA           NA    </span></span>
-<span><span class="co">#&gt;  5    0.2 sd__O…       10       NA             NA       NA   NA           NA    </span></span>
-<span><span class="co">#&gt;  6    0.5 (Inte…       10       -0.192          0.208    0   -0.192       NA    </span></span>
-<span><span class="co">#&gt;  7    0.5 chron…       10       -0.0404         0.0206   0.5 NA           NA    </span></span>
-<span><span class="co">#&gt;  8    0.5 condi…       10        0.484          0.102    1   NA            0.590</span></span>
-<span><span class="co">#&gt;  9    0.5 sd__(…       10       NA             NA       NA   NA           NA    </span></span>
-<span><span class="co">#&gt; 10    0.5 sd__O…       10       NA             NA       NA   NA           NA</span></span></code></pre></div>
+<span><span class="co">#&gt;  1    0.2 (Inte…       10         0.333          0.110  0.45 -0.155       NA    </span></span>
+<span><span class="co">#&gt;  2    0.2 chron…       10         0.333          0.110  0.45 NA           NA    </span></span>
+<span><span class="co">#&gt;  3    0.2 condi…       10         0.333          0.110  0.45 NA            0.328</span></span>
+<span><span class="co">#&gt;  4    0.2 sd__(…       10         0.333          0.110  0.45 NA           NA    </span></span>
+<span><span class="co">#&gt;  5    0.2 sd__O…       10         0.333          0.110  0.45 NA           NA    </span></span>
+<span><span class="co">#&gt;  6    0.5 (Inte…       10         0.333          0.110  0.45 -0.192       NA    </span></span>
+<span><span class="co">#&gt;  7    0.5 chron…       10         0.333          0.110  0.45 NA           NA    </span></span>
+<span><span class="co">#&gt;  8    0.5 condi…       10         0.333          0.110  0.45 NA            0.590</span></span>
+<span><span class="co">#&gt;  9    0.5 sd__(…       10         0.333          0.110  0.45 NA           NA    </span></span>
+<span><span class="co">#&gt; 10    0.5 sd__O…       10         0.333          0.110  0.45 NA           NA</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

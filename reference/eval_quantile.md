@@ -59,6 +59,7 @@ sim_models <- tibble(
 
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     lower_quantile = eval_quantile(
       estimate,
@@ -69,7 +70,9 @@ sim_models |>
       term = c("wt" = 0.95)
     )
   )
-#> Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),     true = NA_real_, false = mean(rlang::.data$estimate, na.rm = TRUE)),     mean_std.error = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$std.error,             na.rm = TRUE)), power = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$p.value <             alpha, na.rm = TRUE)), !!!summary_exprs, !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = base::mean, sd = stats::sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }): ℹ In argument: `mean_estimate = dplyr::if_else(...)`.
-#> Caused by error in `evaluate_model_results()`:
-#> ! Can't subset `.data` outside of a data mask context.
+#> # A tibble: 1 × 7
+#>   term  n_models mean_estimate mean_std.error power lower_quantile
+#>   <chr>    <int>         <dbl>          <dbl> <dbl>          <dbl>
+#> 1 wt          50         -5.34          0.559     1          -5.34
+#> # ℹ 1 more variable: upper_quantile <dbl>
 ```

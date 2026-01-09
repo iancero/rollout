@@ -89,8 +89,10 @@ fitted_models <- fit_models(
   datasets,
   .x = data,
   .f = ~ lme4::lmer(Reaction ~ Days + (Days | Subject), data = .),
-  packages = c("lme4")
+  packages = c("lme4"),
+  n_cores = 1
 )
+#> boundary (singular) fit: see help('isSingular')
 
 # Inspect the first fitted mixed model
 summary(fitted_models$model[[1]])
@@ -140,7 +142,8 @@ extracted |>
     mean_estimate = mean(estimate, na.rm = TRUE),
     sd_estimate = sd(estimate, na.rm = TRUE)
   )
-#> Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),     true = NA_real_, false = mean(rlang::.data$estimate, na.rm = TRUE)),     mean_std.error = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$std.error,             na.rm = TRUE)), power = dplyr::if_else(condition = all(is.na(rlang::.data$p.value)),         true = NA_real_, false = mean(rlang::.data$p.value <             alpha, na.rm = TRUE)), !!!summary_exprs, !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = base::mean, sd = stats::sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }): ℹ In argument: `mean_estimate = dplyr::if_else(...)`.
-#> Caused by error in `evaluate_model_results()`:
-#> ! Can't subset `.data` outside of a data mask context.
+#> # A tibble: 1 × 5
+#>   n_models mean_estimate mean_std.error power sd_estimate
+#>      <int>         <dbl>          <dbl> <dbl>       <dbl>
+#> 1        5          9.52             NA    NA       0.924
 ```
