@@ -43,6 +43,7 @@ sim_models <- tibble(
 
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     prop_below_0 = eval_less_than(
       estimate,

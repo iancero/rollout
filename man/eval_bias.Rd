@@ -49,6 +49,7 @@ sim_models <- tibble(
 # Compute bias relative to true value (hypothetical slope = -5)
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     bias = eval_bias(
       estimate,

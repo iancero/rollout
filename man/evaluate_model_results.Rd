@@ -59,6 +59,7 @@ sim_models <- tibble(
 # Evaluate power and mean estimate for the slope
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     alpha = 0.05,
     mean_estimate = mean(estimate, na.rm = TRUE),
@@ -68,6 +69,7 @@ sim_models |>
 # Evaluate with .summarise_standard_broom = TRUE
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     .summarise_standard_broom = TRUE
   )
@@ -76,6 +78,7 @@ sim_models |>
 # Suppose the true slope of wt is -5 (hypothetical)
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     bias = eval_bias(
       estimate,

@@ -43,6 +43,7 @@ sim_models <- tibble(
 
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     lower_quantile = eval_quantile(
       estimate,

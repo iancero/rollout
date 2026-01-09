@@ -44,6 +44,7 @@ sim_models <- tibble(
 
 sim_models |>
   filter(term == "wt") |>
+  group_by(term) |>
   evaluate_model_results(
     prop_between = eval_between(
       estimate,
