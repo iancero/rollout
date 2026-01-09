@@ -35,8 +35,7 @@ pivot_schedule_longer <- function(schedule,
                                   cohort_name = "cohort",
                                   local_time = TRUE) {
 
-  cohort_name_sym <- rlang::ensym(cohort_name)
-  cohort_name_char <- rlang::as_string(cohort_name_sym)
+  cohort_name_char <- rlang::as_string(rlang::ensym(cohort_name))
 
   schedule <- schedule |>
     tidyr::pivot_longer(
@@ -51,8 +50,7 @@ pivot_schedule_longer <- function(schedule,
   if (local_time) {
     schedule <- schedule |>
       dplyr::group_by(
-        rlang::.data[[cohort_name_char]],
-        rlang::.data[[values_to]]
+        dplyr::across(dplyr::all_of(c(cohort_name_char, values_to)))
       ) |>
       dplyr::mutate(local_time = dplyr::row_number() - 1L) |>
       dplyr::ungroup()
@@ -60,6 +58,7 @@ pivot_schedule_longer <- function(schedule,
 
   schedule
 }
+
 
 
 

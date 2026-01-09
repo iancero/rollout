@@ -51,12 +51,13 @@ extract_model_results <- function(
     tidyr::unnest(cols = ".results")
 
   if (!is.null(.term)) {
-    results <- results |>
-      dplyr::filter(rlang::.data$term == .term)
+    # Avoid `.data` / NSE entirely here to prevent R CMD check masking issues
+    results <- results[results[["term"]] == .term, , drop = FALSE]
   }
 
   results
 }
+
 
 
 
@@ -103,6 +104,7 @@ extract_model_results <- function(
 #' # Evaluate power and mean estimate for the slope
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     alpha = 0.05,
 #'     mean_estimate = mean(estimate, na.rm = TRUE),
@@ -112,6 +114,7 @@ extract_model_results <- function(
 #' # Evaluate with .summarise_standard_broom = TRUE
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     .summarise_standard_broom = TRUE
 #'   )
@@ -120,6 +123,7 @@ extract_model_results <- function(
 #' # Suppose the true slope of wt is -5 (hypothetical)
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     bias = eval_bias(
 #'       estimate,
@@ -137,25 +141,28 @@ evaluate_model_results <- function(
 ) {
   summary_exprs <- rlang::enquos(...)
 
+  pval <- results[["p.value"]]
+  est  <- results[["estimate"]]
+  se   <- results[["std.error"]]
+
   results |>
     dplyr::summarise(
       n_models = dplyr::n(),
       mean_estimate = dplyr::if_else(
-        condition = all(is.na(rlang::.data$p.value)),
-        true = NA_real_,
-        false = mean(rlang::.data$estimate, na.rm = TRUE)
+        all(is.na(pval)),
+        NA_real_,
+        mean(est, na.rm = TRUE)
       ),
       mean_std.error = dplyr::if_else(
-        condition = all(is.na(rlang::.data$p.value)),
-        true = NA_real_,
-        false = mean(rlang::.data$std.error, na.rm = TRUE)
+        all(is.na(pval)),
+        NA_real_,
+        mean(se, na.rm = TRUE)
       ),
       power = dplyr::if_else(
-        condition = all(is.na(rlang::.data$p.value)),
-        true = NA_real_,
-        false = mean(rlang::.data$p.value < alpha, na.rm = TRUE)
+        all(is.na(pval)),
+        NA_real_,
+        mean(pval < alpha, na.rm = TRUE)
       ),
-      # power_std.error = sqrt(power*(1-power)/n_models),
       !!!summary_exprs,
       !!!{
         if (.summarise_standard_broom) {
@@ -212,6 +219,7 @@ evaluate_model_results <- function(
 #' # Compute bias relative to true value (hypothetical slope = -5)
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     bias = eval_bias(
 #'       estimate,
@@ -259,40 +267,6 @@ eval_bias <- function(x, term = NULL, na.rm = FALSE, warnings = TRUE) {
   bias
 }
 
-# eval_bias_old <- function(x, term = NULL, na.rm = FALSE) {
-#   if (!is.numeric(x)) {
-#     rlang::abort("`x` must be numeric.")
-#   }
-#
-#   if (is.null(term)) {
-#     return(mean(x - 0, na.rm = na.rm))
-#   }
-#
-#   if (!rlang::is_named(term)) {
-#     abort("`term` must be a named vector (e.g., c(x = 1)).")
-#   }
-#
-#   group_vars <- dplyr::cur_group()
-#   if (is.null(group_vars) || length(group_vars) == 0) {
-#     abort("`eval_bias()` must be used inside a grouped `dplyr` context when `term` is provided.")
-#   }
-#
-#   if (!"term" %in% names(group_vars)) {
-#     abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_bias()`?")
-#   }
-#
-#   current_term <- as.character(group_vars$term)
-#   if (!current_term %in% names(term)) {
-#     rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
-#     return(NA_real_)
-#   }
-#
-#   bias <- mean(x - term[[current_term]], na.rm = na.rm)
-#
-#   bias
-# }
-
-
 #' Compute the proportion of values above term-specific thresholds within grouped simulation results
 #'
 #' Computes the proportion of `x` values exceeding term-specific thresholds within each group,
@@ -327,6 +301,7 @@ eval_bias <- function(x, term = NULL, na.rm = FALSE, warnings = TRUE) {
 #'
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     prop_above_0 = eval_greater_than(
 #'       estimate,
@@ -403,6 +378,7 @@ eval_greater_than <- function(x, term = NULL, na.rm = FALSE) {
 #'
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     prop_below_0 = eval_less_than(
 #'       estimate,
@@ -480,6 +456,7 @@ eval_less_than <- function(x, term = NULL, na.rm = FALSE) {
 #'
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     prop_between = eval_between(
 #'       estimate,
@@ -497,19 +474,35 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
     return(mean(x >= 0 & x <= 1, na.rm = na.rm))
   }
 
-  if (!is.list(term) || !rlang::is_named(term)) {
-    abort("`term` must be a named list of numeric vectors of length 2.")
+  # Allow either:
+  # 1) a named list of length-2 numeric vectors (per-term bounds)
+  # 2) a single numeric vector of length 2 (global bounds)
+  if (is.numeric(term) && length(term) == 2 && !rlang::is_named(term)) {
+    lower <- term[1]
+    upper <- term[2]
+    return(mean(x >= lower & x <= upper, na.rm = na.rm))
   }
 
-  # Check that all elements of the list are numeric of length 2
+  if (!is.list(term) || !rlang::is_named(term)) {
+    abort("`term` must be a named list of numeric vectors of length 2, or a numeric vector length 2.")
+  }
+
   valid_intervals <- purrr::map_lgl(term, ~ is.numeric(.x) && length(.x) == 2)
   if (!all(valid_intervals)) {
     abort("Each element of `term` must be a numeric vector of length 2 (lower and upper bounds).")
   }
 
   group_vars <- dplyr::cur_group()
+
+  # If ungrouped, allow only the single-term mapping case
   if (is.null(group_vars) || length(group_vars) == 0) {
-    abort("`eval_between()` must be used inside a grouped `dplyr` context when `term` is provided.")
+    if (length(term) == 1) {
+      bounds <- term[[1]]
+      lower <- bounds[1]
+      upper <- bounds[2]
+      return(mean(x >= lower & x <= upper, na.rm = na.rm))
+    }
+    abort("`eval_between()` must be used inside a grouped `dplyr` context when `term` has multiple entries.")
   }
 
   if (!"term" %in% names(group_vars)) {
@@ -518,7 +511,6 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
 
   current_term <- as.character(group_vars$term)
   if (!current_term %in% names(term)) {
-    # rlang::warn(glue::glue("Term '{current_term}' not found in `term` mapping. Returning NA."))
     return(NA_real_)
   }
 
@@ -526,9 +518,9 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
   lower <- bounds[1]
   upper <- bounds[2]
 
-  prop <- mean(x >= lower & x <= upper, na.rm = na.rm)
-  return(prop)
+  mean(x >= lower & x <= upper, na.rm = na.rm)
 }
+
 
 #' Compute the observed quantile value for each term within grouped simulation results
 #'
@@ -564,6 +556,7 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
 #'
 #' sim_models |>
 #'   filter(term == "wt") |>
+#'   group_by(term) |>
 #'   evaluate_model_results(
 #'     lower_quantile = eval_quantile(
 #'       estimate,

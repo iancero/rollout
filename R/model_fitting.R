@@ -48,8 +48,9 @@
 #'   datasets,
 #'   .x = data,
 #'   .f = ~ lme4::lmer(Reaction ~ Days + (Days | Subject), data = .),
-#'   packages = c("lme4")
-#' )
+#'   packages = c("lme4"),
+#'   n_cores = 1
+#')
 #'
 #' # Inspect the first fitted mixed model
 #' summary(fitted_models$model[[1]])
