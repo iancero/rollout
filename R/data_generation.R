@@ -11,6 +11,7 @@
 #' @param values_to Name of the new column to store condition values (default `"condition"`).
 #' @param values_transform Function to transform condition values (default `as.factor`).
 #' @param cohort_name The column indicating cohort membership for local time calculation (default `cohort`).
+#' @param site_name The column indicating site identifier for local time calculation (default `site`).
 #' @param local_time Logical; if `TRUE`, adds a `local_time` column indicating time since rollout start for each cohort and condition (default `TRUE`).
 #'
 #' @return A long-format `tibble` with columns for cohort, condition, chronological time, and optionally local time.
@@ -33,9 +34,11 @@ pivot_schedule_longer <- function(schedule,
                                   values_to = "condition",
                                   values_transform = as.factor,
                                   cohort_name = "cohort",
+                                  site_name = "site",
                                   local_time = TRUE) {
 
   cohort_name_char <- rlang::as_string(rlang::ensym(cohort_name))
+  site_name_char <- rlang::as_string(rlang::ensym(site_name))
 
   schedule <- schedule |>
     tidyr::pivot_longer(
@@ -50,7 +53,7 @@ pivot_schedule_longer <- function(schedule,
   if (local_time) {
     schedule <- schedule |>
       dplyr::group_by(
-        dplyr::across(dplyr::all_of(c(cohort_name_char, values_to)))
+        dplyr::across(dplyr::all_of(c(cohort_name_char, site_name_char, values_to)))
       ) |>
       dplyr::mutate(local_time = dplyr::row_number() - 1L) |>
       dplyr::ungroup()
@@ -153,12 +156,3 @@ add_parameter <- function(df, ...) {
   df |>
     tidyr::expand_grid(!!!evaluated)
 }
-
-
-
-
-
-
-
-
-
