@@ -87,6 +87,6 @@ sim_models |>
 #> # A tibble: 2 × 6
 #>   term        n_models mean_estimate mean_std.error power  bias
 #>   <chr>          <int>         <dbl>          <dbl> <dbl> <dbl>
-#> 1 (Intercept)       50          16.0           1.22     1 37.3 
-#> 2 wt                50          16.0           1.22     1 -5.34
+#> 1 (Intercept)       50         37.3           1.88      1 37.3 
+#> 2 wt                50         -5.34          0.559     1 -5.34
 ```

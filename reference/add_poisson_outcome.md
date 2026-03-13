@@ -43,11 +43,11 @@ A `tibble` with added linear predictor, rate, and count columns.
 df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
 add_poisson_outcome(df)
 #> # A tibble: 5 × 6
-#>   .beta     .u .error y_linear y_rate y_count
-#>   <dbl>  <dbl>  <dbl>    <dbl>  <dbl>   <int>
-#> 1   0.5  0.151 -0.795   -0.145  0.865       2
-#> 2   0.5 -0.293 -1.57    -1.36   0.257       0
-#> 3   0.5  0.255 -1.04    -0.286  0.752       0
-#> 4   0.5 -0.553  1.02     0.967  2.63        4
-#> 5   0.5  1.41  -0.702    1.20   3.33        5
+#>   .beta      .u .error y_linear y_rate y_count
+#>   <dbl>   <dbl>  <dbl>    <dbl>  <dbl>   <int>
+#> 1   0.5 -0.872  -2.05    -2.42  0.0885       1
+#> 2   0.5  0.107   0.151    0.757 2.13         2
+#> 3   0.5 -0.587  -0.293   -0.380 0.684        0
+#> 4   0.5 -0.328   0.255    0.427 1.53         2
+#> 5   0.5 -0.0854 -0.553   -0.139 0.871        0
 ```

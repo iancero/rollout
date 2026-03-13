@@ -35,12 +35,12 @@ A `tibble` with the added random effect column.
 df <- tibble::tibble(site = rep(1:2, each = 3))
 add_random_effect(df, u = rnorm(1, 0, 1), .nesting = "site")
 #> # A tibble: 6 × 2
-#>    site      .u
-#>   <int>   <dbl>
-#> 1     1 -0.206 
-#> 2     1 -0.206 
-#> 3     1 -0.206 
-#> 4     2  0.0192
-#> 5     2  0.0192
-#> 6     2  0.0192
+#>    site     .u
+#>   <int>  <dbl>
+#> 1     1 2.76  
+#> 2     1 2.76  
+#> 3     1 2.76  
+#> 4     2 0.0465
+#> 5     2 0.0465
+#> 6     2 0.0465
 ```
