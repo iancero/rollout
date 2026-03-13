@@ -141,27 +141,23 @@ evaluate_model_results <- function(
 ) {
   summary_exprs <- rlang::enquos(...)
 
-  pval <- results[["p.value"]]
-  est  <- results[["estimate"]]
-  se   <- results[["std.error"]]
-
   results |>
     dplyr::summarise(
       n_models = dplyr::n(),
       mean_estimate = dplyr::if_else(
-        all(is.na(pval)),
+        all(is.na(p.value)),
         NA_real_,
-        mean(est, na.rm = TRUE)
+        mean(estimate, na.rm = TRUE)
       ),
       mean_std.error = dplyr::if_else(
-        all(is.na(pval)),
+        all(is.na(p.value)),
         NA_real_,
-        mean(se, na.rm = TRUE)
+        mean(std.error, na.rm = TRUE)
       ),
       power = dplyr::if_else(
-        all(is.na(pval)),
+        all(is.na(p.value)),
         NA_real_,
-        mean(pval < alpha, na.rm = TRUE)
+        mean(p.value < alpha, na.rm = TRUE)
       ),
       !!!summary_exprs,
       !!!{
