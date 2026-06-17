@@ -129,26 +129,51 @@ add_linear_outcome <- function(data, output_col = "y_linear") {
 }
 
 
-#' Create a binary outcome from linear predictors
+#' Create a binomial outcome from linear predictors
 #'
-#' Generates a binary outcome by summing effects, computing probabilities via the logistic function, and drawing binary outcomes.
+#' Generates a binomial outcome by summing effects, computing probabilities via the logistic
+#' function, and drawing a count out of a specified number of trials. This generalizes
+#' [add_binary_outcome()] (which is a `size = 1` special case of this function) to support a
+#' denominator greater than 1 — for example, a "Reach" outcome where `size` is the number of
+#' people eligible at a site-period and the resulting count is the number who received an
+#' intervention.
 #'
 #' @param data A data frame containing effect columns prefixed with `"."`.
+#' @param size The number of trials for the binomial draw (the denominator). Either a single
+#'   fixed value (e.g. `size = 10`) or the bare name of a column in `data` holding a per-row
+#'   value (e.g. `size = n_eligible`).
 #' @param linear_col Name of the column to store the summed linear predictor (default `"y_linear"`).
 #' @param prob_col Name of the column to store probabilities (default `"y_prob"`).
-#' @param binary_col Name of the column to store binary outcomes (default `"y_bin"`).
+#' @param binom_col Name of the column to store binomial counts (default `"y_binom"`).
+#' @param include_error Logical; whether to include a `.error` column (if present) in the summed
+#'   linear predictor (default `FALSE`). A binomial outcome's variance is already implied by `p`
+#'   and `size`, so an additional individual-level residual error term is usually not part of the
+#'   intended generative model. Set to `TRUE` to instead sum every `.`-prefixed column, including
+#'   `.error`.
 #'
-#' @return A `tibble` with added linear predictor, probability, and binary outcome columns.
+#' @return A `tibble` with added linear predictor, probability, and binomial count columns.
 #' @examples
-#' df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
-#' add_binary_outcome(df)
+#' df <- tibble::tibble(.beta = 0.5, .u = rnorm(5))
+#'
+#' # Fixed number of trials
+#' add_binomial_outcome(df, size = 10)
+#'
+#' # Per-row number of trials drawn from a column (e.g. an eligible count)
+#' df2 <- tibble::tibble(.beta = 0.5, .u = rnorm(5), n_eligible = c(8, 12, 9, 15, 10))
+#' add_binomial_outcome(df2, size = n_eligible)
 #' @export
-add_binary_outcome <- function(data,
-                               linear_col = "y_linear",
-                               prob_col = "y_prob",
-                               binary_col = "y_bin") {
+add_binomial_outcome <- function(data,
+                                 size,
+                                 linear_col = "y_linear",
+                                 prob_col = "y_prob",
+                                 binom_col = "y_binom",
+                                 include_error = FALSE) {
 
   dot_cols <- names(data)[startsWith(names(data), ".")]
+
+  if (!include_error) {
+    dot_cols <- dot_cols[dot_cols != ".error"]
+  }
 
   if (length(dot_cols) == 0) {
     stop("No effect columns found (no columns starting with '.')")
@@ -158,8 +183,51 @@ add_binary_outcome <- function(data,
     dplyr::mutate(
       !!linear_col := rowSums(dplyr::pick(tidyr::all_of(dot_cols))),
       !!prob_col   := stats::plogis(.data[[linear_col]]),
-      !!binary_col := stats::rbinom(dplyr::n(), size = 1, prob = .data[[prob_col]])
+      !!binom_col  := stats::rbinom(dplyr::n(), size = {{ size }}, prob = .data[[prob_col]])
     )
+}
+
+
+#' Create a binary outcome from linear predictors
+#'
+#' Generates a binary outcome by summing effects, computing probabilities via the logistic
+#' function, and drawing binary outcomes. This is a thin wrapper around [add_binomial_outcome()]
+#' with `size = 1`.
+#'
+#' @param data A data frame containing effect columns prefixed with `"."`.
+#' @param linear_col Name of the column to store the summed linear predictor (default `"y_linear"`).
+#' @param prob_col Name of the column to store probabilities (default `"y_prob"`).
+#' @param binary_col Name of the column to store binary outcomes (default `"y_binary"`).
+#' @param include_error Logical; whether to include a `.error` column (if present) in the summed
+#'   linear predictor (default `FALSE`). A Bernoulli outcome's variance is already implied by `p`,
+#'   so an additional individual-level residual error term is usually not part of the intended
+#'   generative model. Set to `TRUE` to instead sum every `.`-prefixed column, including `.error`,
+#'   as earlier versions of this function always did.
+#'
+#' @return A `tibble` with added linear predictor, probability, and binary outcome columns.
+#' @examples
+#' df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
+#'
+#' # By default, .error is excluded from the linear predictor
+#' add_binary_outcome(df)
+#'
+#' # Include .error in the sum if that's really what you want
+#' add_binary_outcome(df, include_error = TRUE)
+#' @export
+add_binary_outcome <- function(data,
+                               linear_col = "y_linear",
+                               prob_col = "y_prob",
+                               binary_col = "y_binary",
+                               include_error = FALSE) {
+
+  add_binomial_outcome(
+    data,
+    size = 1,
+    linear_col = linear_col,
+    prob_col = prob_col,
+    binom_col = binary_col,
+    include_error = include_error
+  )
 }
 
 
