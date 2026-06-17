@@ -32,6 +32,7 @@ your rollout trial design before conducting your study.
 You can install the release version directly from CRAN:
 
 ``` r
+
 install.packages("rollout")
 ```
 
@@ -39,6 +40,7 @@ Or, you can install the development version of `rollout` directly from
 GitHub using the `remotes` package:
 
 ``` r
+
 # Install remotes package if needed
 install.packages("remotes")
 
@@ -54,6 +56,7 @@ for data manipulation and plotting, and the `rollout` package for
 design, simulation, and evaluation of rollout trials.
 
 ``` r
+
 library(tidyverse)
 #> Warning: package 'tidyverse' was built under R version 4.5.2
 #> Warning: package 'ggplot2' was built under R version 4.5.2
@@ -78,6 +81,7 @@ We use a `tribble()` for clarity, then convert to long format using
 [`pivot_schedule_longer()`](https://iancero.github.io/rollout/reference/pivot_schedule_longer.md).
 
 ``` r
+
 # Create a stepped wedge schedule with 8 sites, 4 cohorts, 8 timepoints
 rollout_schedule <- tribble(
   ~cohort, ~site, ~t1, ~t2, ~t3, ~t4, ~t5, ~t6, ~t7, ~t8,
@@ -123,6 +127,7 @@ This will expand the dataset to include a row for each unit at each
 timepoint.
 
 ``` r
+
 # Create unit-level information with variable site sizes
 unit_info <- tribble(
   ~site, ~n_units,
@@ -172,6 +177,7 @@ effect). - We will specify a constant site-level standard deviation
 (`sigma_unit = 1`).
 
 ``` r
+
 design_df <- design_df |>
   add_parameter(
     b_intv = c(0.2, 0.5),
@@ -207,6 +213,7 @@ want for your power estimate. A common guideline is:
 power estimate and `p` is the target power (for example, p = 0.80).
 
 ``` r
+
 design_df <- design_df |>
   initialize_replicates(n = 10)
 
@@ -237,6 +244,7 @@ First, we add a small negative time trend (`b_time = -0.05`) to
 represent gradual improvement over time, independent of intervention.
 
 ``` r
+
 design_df <- design_df |>
   add_parameter(b_time = -0.05)
 ```
@@ -247,6 +255,7 @@ Next, we add fixed effects for: - The intervention effect, applied when
 `condition == "intv"`. - The time trend, scaled by `chron_time`.
 
 ``` r
+
 design_df <- design_df |>
   add_fixed_effect(
     intv_effect = b_intv * as.numeric(condition == "intv")) |>
@@ -260,6 +269,7 @@ We add a random intercept at the site level to simulate between-site
 variability.
 
 ``` r
+
 design_df <- design_df |>
   add_random_effect(
     site_intercept = rnorm(1, mean = 0, sd = sigma_site),
@@ -272,6 +282,7 @@ design_df <- design_df |>
 We add unit-level residual error with variance `sigma_unit^2`.
 
 ``` r
+
 design_df <- design_df |>
   add_error(variance = sigma_unit^2)
 ```
@@ -282,6 +293,7 @@ Finally, we generate a linear outcome (y_linear) by summing all fixed,
 random, and error components.
 
 ``` r
+
 design_df <- design_df |>
   add_linear_outcome(output_col = "y_linear")
 
@@ -321,6 +333,7 @@ This approach allows us to evaluate bias and power across both
 replicates and effect size conditions.
 
 ``` r
+
 fitted_models <- design_df |>
   group_by(sample_id, b_intv) |>
   nest() |>
@@ -358,6 +371,7 @@ We will: - **Extract model estimates** using
 `evaluate_model_results). - **Summarize bias** of the intervention effect using`eval_bias()`. - **Estimate a critical value** by calculating the observed value of b-estimates above the 97.5th percentile, using`eval_quantile()\`.
 
 ``` r
+
 # Extract tidy model results
 model_results <- fitted_models |>
   extract_model_results()
