@@ -4,6 +4,8 @@
 
 - [`add_binary_outcome()`](https://iancero.github.io/rollout/reference/add_binary_outcome.md)
   : Create a binary outcome from linear predictors
+- [`add_binomial_outcome()`](https://iancero.github.io/rollout/reference/add_binomial_outcome.md)
+  : Create a binomial outcome from linear predictors
 - [`add_error()`](https://iancero.github.io/rollout/reference/add_error.md)
   : Add an error term for simulation
 - [`add_fixed_effect()`](https://iancero.github.io/rollout/reference/add_fixed_effect.md)

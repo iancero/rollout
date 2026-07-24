@@ -29,11 +29,11 @@ A `tibble` with the added linear outcome column.
 df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
 add_linear_outcome(df)
 #> # A tibble: 5 × 4
-#>   .beta      .u .error y_linear
-#>   <dbl>   <dbl>  <dbl>    <dbl>
-#> 1   0.5  0.724   0.770    1.99 
-#> 2   0.5  2.35    0.563    3.42 
-#> 3   0.5 -0.281  -0.374   -0.155
-#> 4   0.5 -0.481  -0.601   -0.582
-#> 5   0.5  0.0792 -0.424    0.155
+#>   .beta      .u  .error y_linear
+#>   <dbl>   <dbl>   <dbl>    <dbl>
+#> 1   0.5  0.0700  2.76     3.33  
+#> 2   0.5 -0.639   0.0465  -0.0926
+#> 3   0.5 -0.0500  0.578    1.03  
+#> 4   0.5 -0.251   0.118    0.367 
+#> 5   0.5  0.445  -1.91    -0.967 
 ```

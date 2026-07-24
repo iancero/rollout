@@ -30,11 +30,11 @@ A `tibble` with the added fixed effect column.
 df <- tibble::tibble(x = rnorm(5))
 add_fixed_effect(df, beta = 0.5 * x)
 #> # A tibble: 5 × 2
-#>          x    .beta
-#>      <dbl>    <dbl>
-#> 1 -0.171   -0.0854 
-#> 2  1.63     0.816  
-#> 3 -0.783   -0.391  
-#> 4 -0.00289 -0.00145
-#> 5  0.413    0.207  
+#>        x   .beta
+#>    <dbl>   <dbl>
+#> 1 -0.134 -0.0670
+#> 2 -1.91  -0.955 
+#> 3 -0.279 -0.140 
+#> 4 -0.313 -0.157 
+#> 5  1.07   0.534 
 ```

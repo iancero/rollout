@@ -16,6 +16,7 @@ pivot_schedule_longer(
   values_to = "condition",
   values_transform = as.factor,
   cohort_name = "cohort",
+  site_name = "site",
   local_time = TRUE
 )
 ```
@@ -58,6 +59,11 @@ pivot_schedule_longer(
 
   The column indicating cohort membership for local time calculation
   (default `cohort`).
+
+- site_name:
+
+  The column indicating site identifier for local time calculation
+  (default `site`).
 
 - local_time:
 

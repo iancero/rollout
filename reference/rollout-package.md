@@ -30,5 +30,8 @@ Useful links:
 
 Authors:
 
+- Ian Cero <ian_cero@urmc.rochester.edu>
+  ([ORCID](https://orcid.org/0000-0002-2862-0450))
+
 - C. Hendricks Brown <hendricks.brown@northwestern.edu>
   ([ORCID](https://orcid.org/0000-0002-0294-2419))

@@ -33,10 +33,19 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="rollout-020">rollout 0.2.0<a class="anchor" aria-label="anchor" href="#rollout-020"></a></h2>
+<ul><li>New function <code><a href="../reference/add_binomial_outcome.html">add_binomial_outcome()</a></code> generalizes <code><a href="../reference/add_binary_outcome.html">add_binary_outcome()</a></code> to support a binomial outcome with more than one trial. <code>size</code> (the number of trials, i.e. the denominator) can be a fixed value or the name of an existing column, so a per-row size that varies — e.g. a Poisson-distributed eligible count generated upstream with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> — can be piped straight in: <code>add_binomial_outcome(size = n_eligible, ...)</code>. <code><a href="../reference/add_binary_outcome.html">add_binary_outcome()</a></code> is now a <code>size = 1</code> special case of this function.</li>
+<li>
+<code><a href="../reference/add_binary_outcome.html">add_binary_outcome()</a></code> and <code><a href="../reference/add_binomial_outcome.html">add_binomial_outcome()</a></code> both gain an <code>include_error</code> argument (default <code>FALSE</code>). By default, a <code>.error</code> column (if present) is no longer included in the summed linear predictor for these two outcomes, since a Bernoulli/binomial outcome’s variance is already implied by <code>p</code> (and <code>size</code>). Set <code>include_error = TRUE</code> to restore the previous behavior of summing every <code>.</code>-prefixed column.</li>
+<li>
+<strong>Breaking change:</strong> <code><a href="../reference/add_binary_outcome.html">add_binary_outcome()</a></code>’s default output column is now named <code>"y_binary"</code> (previously <code>"y_bin"</code>).</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="rollout-010">rollout 0.1.0<a class="anchor" aria-label="anchor" href="#rollout-010"></a></h2><p class="text-muted">CRAN release: 2026-01-13</p>
 <ul><li>Initial CRAN submission.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
@@ -44,7 +53,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
