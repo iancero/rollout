@@ -8,7 +8,8 @@ add_binary_outcome(
   data,
   linear_col = "y_linear",
   prob_col = "y_prob",
-  binary_col = "y_bin"
+  binary_col = "y_binary",
+  include_error = FALSE
 )
 }
 \arguments{
@@ -18,15 +19,28 @@ add_binary_outcome(
 
 \item{prob_col}{Name of the column to store probabilities (default \code{"y_prob"}).}
 
-\item{binary_col}{Name of the column to store binary outcomes (default \code{"y_bin"}).}
+\item{binary_col}{Name of the column to store binary outcomes (default \code{"y_binary"}).}
+
+\item{include_error}{Logical; whether to include a \code{.error} column (if present) in the summed
+linear predictor (default \code{FALSE}). A Bernoulli outcome's variance is already implied by \code{p},
+so an additional individual-level residual error term is usually not part of the intended
+generative model. Set to \code{TRUE} to instead sum every \code{.}-prefixed column, including \code{.error},
+as earlier versions of this function always did.}
 }
 \value{
 A \code{tibble} with added linear predictor, probability, and binary outcome columns.
 }
 \description{
-Generates a binary outcome by summing effects, computing probabilities via the logistic function, and drawing binary outcomes.
+Generates a binary outcome by summing effects, computing probabilities via the logistic
+function, and drawing binary outcomes. This is a thin wrapper around \code{\link[=add_binomial_outcome]{add_binomial_outcome()}}
+with \code{size = 1}.
 }
 \examples{
 df <- tibble::tibble(.beta = 0.5, .u = rnorm(5), .error = rnorm(5))
+
+# By default, .error is excluded from the linear predictor
 add_binary_outcome(df)
+
+# Include .error in the sum if that's really what you want
+add_binary_outcome(df, include_error = TRUE)
 }
