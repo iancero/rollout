@@ -22,6 +22,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Ian Cero \email{ian_cero@urmc.rochester.edu} (\href{https://orcid.org/0000-0002-2862-0450}{ORCID})
   \item C. Hendricks Brown \email{hendricks.brown@northwestern.edu} (\href{https://orcid.org/0000-0002-0294-2419}{ORCID})
 }
 
