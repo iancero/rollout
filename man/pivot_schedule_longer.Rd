@@ -13,6 +13,7 @@ pivot_schedule_longer(
   values_to = "condition",
   values_transform = as.factor,
   cohort_name = "cohort",
+  site_name = "site",
   local_time = TRUE
 )
 }
@@ -32,6 +33,8 @@ pivot_schedule_longer(
 \item{values_transform}{Function to transform condition values (default \code{as.factor}).}
 
 \item{cohort_name}{The column indicating cohort membership for local time calculation (default \code{cohort}).}
+
+\item{site_name}{The column indicating site identifier for local time calculation (default \code{site}).}
 
 \item{local_time}{Logical; if \code{TRUE}, adds a \code{local_time} column indicating time since rollout start for each cohort and condition (default \code{TRUE}).}
 }
