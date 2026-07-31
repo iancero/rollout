@@ -74,6 +74,9 @@ extract_model_results <- function(
 #' @param ... Additional summary expressions to compute within `dplyr::summarise()`.
 #'            These may include calls to helper functions like `eval_bias()`, `eval_quantile()`,
 #'            or direct summaries such as `mean(estimate, na.rm = TRUE)`.
+#'            The `term` argument of the `eval_*()` helpers may reference grouping variables
+#'            (e.g., `eval_bias(estimate, term = c(conditionimpl = beta))` when grouped by
+#'            `beta`), so that true values can vary across simulated parameter conditions.
 #' @param .summarise_standard_broom Logical; if `TRUE`, computes mean and standard deviation
 #' for standard `broom` columns present in the data (columns in `broom_cols`).
 #' Defaults to `FALSE`.
@@ -185,6 +188,10 @@ evaluate_model_results <- function(
 #' @param term A named numeric vector providing the true value for each term.
 #' For example, `c("(Intercept)" = 0, x = 2)` to specify the true values for each term.
 #' If `NULL` (default), bias is computed relative to zero.
+#' Values may be numeric literals or expressions that reference grouping variables
+#' (e.g., `c(conditionimpl = beta)` when the results are grouped by `beta`), allowing
+#' the true value to vary across simulated parameter conditions. Each element must
+#' resolve to a single value within the current group.
 #' @param warnings Should warnings be returned?
 #' @param na.rm Logical; whether to remove missing values when computing the mean bias.
 #' Defaults to `FALSE`.
@@ -230,21 +237,36 @@ evaluate_model_results <- function(
 #'     bias = eval_bias(estimate)
 #'   )
 #'
+#' # True values may reference grouping variables, allowing them to vary
+#' # across simulated parameter conditions (here, a different true effect
+#' # for each value of `beta`):
+#' sim_grid <- tidyr::expand_grid(
+#'   beta = c(0.35, 0.65),
+#'   term = "conditionimpl",
+#'   rep = 1:20
+#' ) |>
+#'   mutate(estimate = beta + rnorm(40, sd = 0.05))
+#'
+#' sim_grid |>
+#'   group_by(beta, term) |>
+#'   summarise(
+#'     bias = eval_bias(estimate, term = c(conditionimpl = beta)),
+#'     .groups = "drop"
+#'   )
+#'
 #' @export
 eval_bias <- function(x, term = NULL, na.rm = FALSE, warnings = TRUE) {
   if (!is.numeric(x)) {
     rlang::abort("`x` must be numeric.")
   }
 
+  term <- resolve_term_arg(rlang::enquo(term), fn_name = "eval_bias")
+
   if (is.null(term)) {
     return(mean(x - 0, na.rm = na.rm))
   }
 
-  if (!rlang::is_named(term)) {
-    abort("`term` must be a named vector (e.g., c(x = 1)).")
-  }
-
-  group_vars <- dplyr::cur_group()
+  group_vars <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
   if (is.null(group_vars) || length(group_vars) == 0) {
     abort("`eval_bias()` must be used inside a grouped `dplyr` context when `term` is provided.")
   }
@@ -271,6 +293,9 @@ eval_bias <- function(x, term = NULL, na.rm = FALSE, warnings = TRUE) {
 #' @param x A numeric vector of estimates or statistics.
 #' @param term A named numeric vector providing the threshold for each term.
 #' For example, `c("(Intercept)" = 0, x = 2)`. If `NULL` (default), threshold is assumed to be zero.
+#' Thresholds may be numeric literals or expressions that reference grouping variables
+#' (e.g., `c(conditionimpl = beta)` when the results are grouped by `beta`). Each element
+#' must resolve to a single value within the current group.
 #' @param na.rm Logical; whether to remove missing values when computing the proportion.
 #' Defaults to `FALSE`.
 #'
@@ -311,21 +336,19 @@ eval_greater_than <- function(x, term = NULL, na.rm = FALSE) {
     abort("`x` must be numeric.")
   }
 
+  term <- resolve_term_arg(rlang::enquo(term), fn_name = "eval_greater_than")
+
   if (is.null(term)) {
     return(mean(x > 0, na.rm = na.rm))
   }
 
-  if (!rlang::is_named(term)) {
-    abort("`term` must be a named vector (e.g., c(x = 1)).")
-  }
-
-  group_vars <- dplyr::cur_group()
+  group_vars <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
   if (is.null(group_vars) || length(group_vars) == 0) {
-    abort("`eval_greater()` must be used inside a grouped `dplyr` context when `term` is provided.")
+    abort("`eval_greater_than()` must be used inside a grouped `dplyr` context when `term` is provided.")
   }
 
   if (!"term" %in% names(group_vars)) {
-    abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_greater()`?")
+    abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_greater_than()`?")
   }
 
   current_term <- as.character(group_vars$term)
@@ -348,6 +371,9 @@ eval_greater_than <- function(x, term = NULL, na.rm = FALSE) {
 #' @param x A numeric vector of estimates or statistics.
 #' @param term A named numeric vector providing the threshold for each term.
 #' For example, `c("(Intercept)" = 0, x = 2)`. If `NULL` (default), threshold is assumed to be zero.
+#' Thresholds may be numeric literals or expressions that reference grouping variables
+#' (e.g., `c(conditionimpl = beta)` when the results are grouped by `beta`). Each element
+#' must resolve to a single value within the current group.
 #' @param na.rm Logical; whether to remove missing values when computing the proportion.
 #' Defaults to `FALSE`.
 #'
@@ -388,21 +414,19 @@ eval_less_than <- function(x, term = NULL, na.rm = FALSE) {
     abort("`x` must be numeric.")
   }
 
+  term <- resolve_term_arg(rlang::enquo(term), fn_name = "eval_less_than")
+
   if (is.null(term)) {
-    return(mean(x > 0, na.rm = na.rm))
+    return(mean(x < 0, na.rm = na.rm))
   }
 
-  if (!rlang::is_named(term)) {
-    abort("`term` must be a named vector (e.g., c(x = 1)).")
-  }
-
-  group_vars <- dplyr::cur_group()
+  group_vars <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
   if (is.null(group_vars) || length(group_vars) == 0) {
-    abort("`eval_greater()` must be used inside a grouped `dplyr` context when `term` is provided.")
+    abort("`eval_less_than()` must be used inside a grouped `dplyr` context when `term` is provided.")
   }
 
   if (!"term" %in% names(group_vars)) {
-    abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_greater()`?")
+    abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_less_than()`?")
   }
 
   current_term <- as.character(group_vars$term)
@@ -426,6 +450,9 @@ eval_less_than <- function(x, term = NULL, na.rm = FALSE) {
 #' @param term A named list of numeric vectors of length 2, giving the lower and upper bounds for each term.
 #' For example, `list("(Intercept)" = c(-1, 1), x = c(1, 3))`.
 #' If `NULL` (default), the interval is assumed to be `[0, 1]`.
+#' Bounds may be numeric literals or expressions that reference grouping variables
+#' (e.g., `list(conditionimpl = c(beta - 0.1, beta + 0.1))` when the results are grouped
+#' by `beta`). Each element must resolve to a length-2 vector within the current group.
 #' @param na.rm Logical; whether to remove missing values when computing the proportion.
 #' Defaults to `FALSE`.
 #'
@@ -466,6 +493,8 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
     abort("`x` must be numeric.")
   }
 
+  term <- resolve_term_arg(rlang::enquo(term), fn_name = "eval_between", validate = FALSE)
+
   if (is.null(term)) {
     return(mean(x >= 0 & x <= 1, na.rm = na.rm))
   }
@@ -485,10 +514,14 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
 
   valid_intervals <- purrr::map_lgl(term, ~ is.numeric(.x) && length(.x) == 2)
   if (!all(valid_intervals)) {
-    abort("Each element of `term` must be a numeric vector of length 2 (lower and upper bounds).")
+    abort(paste(
+      "Each element of `term` must resolve to a numeric vector of length 2 (lower and upper bounds).",
+      "If a bound references a data column, add that column to `group_by()` so it resolves to a",
+      "single value per group."
+    ))
   }
 
-  group_vars <- dplyr::cur_group()
+  group_vars <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
 
   # If ungrouped, allow only the single-term mapping case
   if (is.null(group_vars) || length(group_vars) == 0) {
@@ -526,6 +559,9 @@ eval_between <- function(x, term = NULL, na.rm = FALSE) {
 #' @param x A numeric vector of estimates or statistics.
 #' @param term A named numeric vector with quantile probabilities for each term.
 #' For example, `c("(Intercept)" = 0.05, x = 0.95)`. If `NULL` (default), computes the median (0.5).
+#' Probabilities may be numeric literals or expressions that reference grouping variables
+#' (e.g., `c(conditionimpl = p)` when the results are grouped by `p`). Each element must
+#' resolve to a single value within the current group.
 #' @param na.rm Logical; whether to remove missing values when computing the quantile.
 #' Defaults to `FALSE`.
 #'
@@ -570,21 +606,23 @@ eval_quantile <- function(x, term = NULL, na.rm = FALSE) {
     abort("`x` must be numeric.")
   }
 
+  term <- resolve_term_arg(rlang::enquo(term), fn_name = "eval_quantile")
+
   if (is.null(term)) {
     return(stats::quantile(x, probs = 0.5, na.rm = na.rm, names = FALSE, type = 7))
   }
 
-  if (!rlang::is_named(term) || !is.numeric(term)) {
+  if (!is.numeric(term)) {
     abort("`term` must be a named numeric vector of quantile probabilities (e.g., c(x = 0.05)).")
   }
 
-  # Check that each element is a single numeric value within [0, 1]
-  valid_probs <- purrr::map_lgl(term, ~ is.numeric(.x) && length(.x) == 1 && .x >= 0 && .x <= 1)
+  # Each resolved probability must lie within [0, 1]
+  valid_probs <- purrr::map_lgl(term, ~ .x >= 0 && .x <= 1)
   if (!all(valid_probs)) {
     abort("Each element of `term` must be a single numeric quantile value between 0 and 1.")
   }
 
-  group_vars <- dplyr::cur_group()
+  group_vars <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
   if (is.null(group_vars) || length(group_vars) == 0) {
     abort("`eval_quantile()` must be used inside a grouped `dplyr` context when `term` is provided.")
   }
@@ -602,4 +640,124 @@ eval_quantile <- function(x, term = NULL, na.rm = FALSE) {
   prob <- term[[current_term]]
   q <- stats::quantile(x, probs = prob, na.rm = na.rm, names = FALSE, type = 7)
   return(q)
+}
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+#' Resolve the `term` argument of an `eval_*()` helper
+#'
+#' Lazily evaluates the captured `term` expression against the current group
+#' keys (`dplyr::cur_group()`), so that elements of `term` may reference
+#' grouping variables (e.g., `c(conditionimpl = beta)` when the results are
+#' grouped by `beta`). Because true values must be constant within each
+#' summarised group for evaluation metrics to be meaningful, any element that
+#' does not resolve to the expected length aborts with guidance to add the
+#' referenced column to `group_by()`.
+#'
+#' When `term` is written as a `c(...)` call with all arguments named, each
+#' argument is evaluated separately before being combined. This is important:
+#' evaluating the whole `c(...)` at once would let `c()` silently flatten a
+#' length-n element (e.g., a non-grouping data column) into n length-1
+#' elements with mangled names, and the term lookup would then silently
+#' return `NA` instead of failing informatively.
+#'
+#' @param term_quo A quosure capturing the `term` argument.
+#' @param fn_name Name of the calling function, used in error messages.
+#' @param element_length Required length of each resolved element.
+#' @param validate Logical; if `FALSE`, only resolves `term` without checking
+#'   names or element lengths. Used by `eval_between()`, which accepts
+#'   multiple input shapes and performs its own validation.
+#'
+#' @return The resolved `term` value (possibly `NULL`).
+#' @noRd
+resolve_term_arg <- function(term_quo, fn_name, element_length = 1L,
+                             validate = TRUE) {
+  group_keys <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
+
+  eval_with_hint <- function(x, env = NULL) {
+    tryCatch(
+      {
+        if (is.null(env)) {
+          rlang::eval_tidy(x, data = group_keys)
+        } else {
+          rlang::eval_tidy(x, data = group_keys, env = env)
+        }
+      },
+      error = function(e) {
+        abort(glue::glue(
+          "Failed to evaluate `term` in `{fn_name}()`: {conditionMessage(e)} ",
+          "If `term` references a column, that column must be a grouping ",
+          "variable (e.g., `group_by(beta, term)`) so it is constant within ",
+          "each group."
+        ))
+      }
+    )
+  }
+
+  expr <- rlang::quo_get_expr(term_quo)
+
+  # If `term` is written as c(name = value, ...), evaluate each element
+  # separately so a value resolving to length > 1 is caught before c()
+  # silently flattens it and mangles the names.
+  if (validate && rlang::is_call(expr, "c")) {
+    args <- rlang::call_args(expr)
+    arg_names <- names(args)
+
+    if (!is.null(arg_names) && all(arg_names != "")) {
+      env <- rlang::quo_get_env(term_quo)
+      values <- lapply(args, function(a) eval_with_hint(a, env = env))
+
+      lens <- lengths(values)
+      if (any(lens != element_length)) {
+        abort_nonscalar_term(
+          fn_name,
+          bad_names = arg_names[lens != element_length],
+          bad_lens = lens[lens != element_length],
+          element_length = element_length
+        )
+      }
+
+      return(stats::setNames(unlist(values, use.names = FALSE), arg_names))
+    }
+  }
+
+  term <- eval_with_hint(term_quo)
+
+  if (is.null(term) || !validate) {
+    return(term)
+  }
+
+  if (!rlang::is_named(term)) {
+    abort(glue::glue(
+      "`term` in `{fn_name}()` must be a named vector (e.g., `c(x = 1)`)."
+    ))
+  }
+
+  lens <- lengths(term)
+  if (any(lens != element_length)) {
+    abort_nonscalar_term(
+      fn_name,
+      bad_names = names(term)[lens != element_length],
+      bad_lens = lens[lens != element_length],
+      element_length = element_length
+    )
+  }
+
+  term
+}
+
+#' Abort with guidance when a `term` element is not constant within the group
+#' @noRd
+abort_nonscalar_term <- function(fn_name, bad_names, bad_lens, element_length) {
+  bad_desc <- paste0("`", bad_names, "` (length ", bad_lens, ")", collapse = ", ")
+  abort(glue::glue(
+    "In `{fn_name}()`, each element of `term` must resolve to length ",
+    "{element_length}, but {bad_desc} did not. True values must be constant ",
+    "within each summarised group. If an element references a data column ",
+    "(e.g., `conditionimpl = beta`), add that column to `group_by()` ",
+    "(e.g., `group_by(beta, term)`) so it resolves to one value per group."
+  ))
 }
