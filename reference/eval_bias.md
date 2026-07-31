@@ -22,6 +22,11 @@ eval_bias(x, term = NULL, na.rm = FALSE, warnings = TRUE)
   A named numeric vector providing the true value for each term. For
   example, `c("(Intercept)" = 0, x = 2)` to specify the true values for
   each term. If `NULL` (default), bias is computed relative to zero.
+  Values may be numeric literals or expressions that reference grouping
+  variables (e.g., `c(conditionimpl = beta)` when the results are
+  grouped by `beta`), allowing the true value to vary across simulated
+  parameter conditions. Each element must resolve to a single value
+  within the current group.
 
 - na.rm:
 
@@ -89,4 +94,26 @@ sim_models |>
 #>   <chr>          <int>         <dbl>          <dbl> <dbl> <dbl>
 #> 1 (Intercept)       50         37.3           1.88      1 37.3 
 #> 2 wt                50         -5.34          0.559     1 -5.34
+
+# True values may reference grouping variables, allowing them to vary
+# across simulated parameter conditions (here, a different true effect
+# for each value of `beta`):
+sim_grid <- tidyr::expand_grid(
+  beta = c(0.35, 0.65),
+  term = "conditionimpl",
+  rep = 1:20
+) |>
+  mutate(estimate = beta + rnorm(40, sd = 0.05))
+
+sim_grid |>
+  group_by(beta, term) |>
+  summarise(
+    bias = eval_bias(estimate, term = c(conditionimpl = beta)),
+    .groups = "drop"
+  )
+#> # A tibble: 2 × 3
+#>    beta term             bias
+#>   <dbl> <chr>           <dbl>
+#> 1  0.35 conditionimpl 0.0129 
+#> 2  0.65 conditionimpl 0.00369
 ```

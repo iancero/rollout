@@ -56,7 +56,11 @@ within each group, typically inside <code><a href="evaluate_model_results.html">
 <dt id="arg-term">term<a class="anchor" aria-label="anchor" href="#arg-term"></a></dt>
 <dd><p>A named numeric vector providing the true value for each term.
 For example, <code>c("(Intercept)" = 0, x = 2)</code> to specify the true values for each term.
-If <code>NULL</code> (default), bias is computed relative to zero.</p></dd>
+If <code>NULL</code> (default), bias is computed relative to zero.
+Values may be numeric literals or expressions that reference grouping variables
+(e.g., <code>c(conditionimpl = beta)</code> when the results are grouped by <code>beta</code>), allowing
+the true value to vary across simulated parameter conditions. Each element must
+resolve to a single value within the current group.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
@@ -121,6 +125,28 @@ the function will return <code>NA</code> with a warning.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> (Intercept)       50         37.3           1.88      1 37.3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> wt                50         -<span style="color: #BB0000;">5.34</span>          0.559     1 -<span style="color: #BB0000;">5.34</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># True values may reference grouping variables, allowing them to vary</span></span></span>
+<span class="r-in"><span><span class="co"># across simulated parameter conditions (here, a different true effect</span></span></span>
+<span class="r-in"><span><span class="co"># for each value of `beta`):</span></span></span>
+<span class="r-in"><span><span class="va">sim_grid</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/expand_grid.html" class="external-link">expand_grid</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.35</span>, <span class="fl">0.65</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  term <span class="op">=</span> <span class="st">"conditionimpl"</span>,</span></span>
+<span class="r-in"><span>  rep <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>estimate <span class="op">=</span> <span class="va">beta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span>, sd <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">sim_grid</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">beta</span>, <span class="va">term</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    bias <span class="op">=</span> <span class="fu">eval_bias</span><span class="op">(</span><span class="va">estimate</span>, term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>conditionimpl <span class="op">=</span> <span class="va">beta</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    beta term             bias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  0.35 conditionimpl 0.012<span style="text-decoration: underline;">9</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>  0.65 conditionimpl 0.003<span style="text-decoration: underline;">69</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

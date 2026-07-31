@@ -22,7 +22,11 @@ eval_between(x, term = NULL, na.rm = FALSE)
   A named list of numeric vectors of length 2, giving the lower and
   upper bounds for each term. For example,
   `list("(Intercept)" = c(-1, 1), x = c(1, 3))`. If `NULL` (default),
-  the interval is assumed to be `[0, 1]`.
+  the interval is assumed to be `[0, 1]`. Bounds may be numeric literals
+  or expressions that reference grouping variables (e.g.,
+  `list(conditionimpl = c(beta - 0.1, beta + 0.1))` when the results are
+  grouped by `beta`). Each element must resolve to a length-2 vector
+  within the current group.
 
 - na.rm:
 

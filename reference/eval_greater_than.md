@@ -21,7 +21,10 @@ eval_greater_than(x, term = NULL, na.rm = FALSE)
 
   A named numeric vector providing the threshold for each term. For
   example, `c("(Intercept)" = 0, x = 2)`. If `NULL` (default), threshold
-  is assumed to be zero.
+  is assumed to be zero. Thresholds may be numeric literals or
+  expressions that reference grouping variables (e.g.,
+  `c(conditionimpl = beta)` when the results are grouped by `beta`).
+  Each element must resolve to a single value within the current group.
 
 - na.rm:
 

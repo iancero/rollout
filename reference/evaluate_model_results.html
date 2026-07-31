@@ -70,7 +70,10 @@ like <code>term</code>, <code>estimate</code>, <code>std.error</code>, <code>sta
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional summary expressions to compute within <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">dplyr::summarise()</a></code>.
 These may include calls to helper functions like <code><a href="eval_bias.html">eval_bias()</a></code>, <code><a href="eval_quantile.html">eval_quantile()</a></code>,
-or direct summaries such as <code>mean(estimate, na.rm = TRUE)</code>.</p></dd>
+or direct summaries such as <code>mean(estimate, na.rm = TRUE)</code>.
+The <code>term</code> argument of the <code>eval_*()</code> helpers may reference grouping variables
+(e.g., <code>eval_bias(estimate, term = c(conditionimpl = beta))</code> when grouped by
+<code>beta</code>), so that true values can vary across simulated parameter conditions.</p></dd>
 
 
 <dt id="arg--summarise-standard-broom">.summarise_standard_broom<a class="anchor" aria-label="anchor" href="#arg--summarise-standard-broom"></a></dt>

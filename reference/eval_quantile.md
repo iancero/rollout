@@ -21,7 +21,10 @@ eval_quantile(x, term = NULL, na.rm = FALSE)
 
   A named numeric vector with quantile probabilities for each term. For
   example, `c("(Intercept)" = 0.05, x = 0.95)`. If `NULL` (default),
-  computes the median (0.5).
+  computes the median (0.5). Probabilities may be numeric literals or
+  expressions that reference grouping variables (e.g.,
+  `c(conditionimpl = p)` when the results are grouped by `p`). Each
+  element must resolve to a single value within the current group.
 
 - na.rm:
 

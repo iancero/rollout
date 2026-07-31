@@ -35,7 +35,11 @@ evaluate_model_results(
   These may include calls to helper functions like
   [`eval_bias()`](https://iancero.github.io/rollout/reference/eval_bias.md),
   [`eval_quantile()`](https://iancero.github.io/rollout/reference/eval_quantile.md),
-  or direct summaries such as `mean(estimate, na.rm = TRUE)`.
+  or direct summaries such as `mean(estimate, na.rm = TRUE)`. The `term`
+  argument of the `eval_*()` helpers may reference grouping variables
+  (e.g., `eval_bias(estimate, term = c(conditionimpl = beta))` when
+  grouped by `beta`), so that true values can vary across simulated
+  parameter conditions.
 
 - .summarise_standard_broom:
 

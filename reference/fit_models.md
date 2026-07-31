@@ -100,27 +100,27 @@ summary(fitted_models$model[[1]])
 #> Formula: Reaction ~ Days + (Days | Subject)
 #>    Data: .
 #> 
-#> REML criterion at convergence: 471.8
+#> REML criterion at convergence: 516.4
 #> 
 #> Scaled residuals: 
 #>     Min      1Q  Median      3Q     Max 
-#> -1.8347 -0.3693 -0.0965  0.3829  2.0813 
+#> -1.5059 -0.3816 -0.0229  0.2241  4.1212 
 #> 
 #> Random effects:
 #>  Groups   Name        Variance Std.Dev. Corr  
-#>  Subject  (Intercept) 1068.17  32.683         
-#>           Days          45.62   6.754   -0.27 
-#>  Residual              293.06  17.119         
-#> Number of obs: 50, groups:  Subject, 18
+#>  Subject  (Intercept)  900.02  30.000         
+#>           Days          59.38   7.706   -0.47 
+#>  Residual             1301.58  36.077         
+#> Number of obs: 50, groups:  Subject, 17
 #> 
 #> Fixed effects:
 #>             Estimate Std. Error t value
-#> (Intercept)  251.505      9.724  25.865
-#> Days           9.374      2.252   4.162
+#> (Intercept)  262.066     12.755  20.546
+#> Days           7.827      2.866   2.731
 #> 
 #> Correlation of Fixed Effects:
 #>      (Intr)
-#> Days -0.506
+#> Days -0.682
 
 # Tidy the fitted models using extract_model_results() for further evaluation
 extracted <- extract_model_results(fitted_models)
@@ -128,12 +128,12 @@ head(extracted)
 #> # A tibble: 6 × 9
 #>      id data          model     effect  group term  estimate std.error statistic
 #>   <int> <list>        <list>    <chr>   <chr> <chr>    <dbl>     <dbl>     <dbl>
-#> 1     1 <df [50 × 3]> <lmerMod> fixed   NA    (Int…  252.         9.72     25.9 
-#> 2     1 <df [50 × 3]> <lmerMod> fixed   NA    Days     9.37       2.25      4.16
-#> 3     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… sd__…   32.7       NA        NA   
-#> 4     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… sd__…    6.75      NA        NA   
-#> 5     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… cor_…   -0.268     NA        NA   
-#> 6     1 <df [50 × 3]> <lmerMod> ran_pa… Resi… sd__…   17.1       NA        NA   
+#> 1     1 <df [50 × 3]> <lmerMod> fixed   NA    (Int…  262.        12.8      20.5 
+#> 2     1 <df [50 × 3]> <lmerMod> fixed   NA    Days     7.83       2.87      2.73
+#> 3     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… sd__…   30.0       NA        NA   
+#> 4     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… sd__…    7.71      NA        NA   
+#> 5     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… cor_…   -0.475     NA        NA   
+#> 6     1 <df [50 × 3]> <lmerMod> ran_pa… Resi… sd__…   36.1       NA        NA   
 
 # Summarise estimates for 'Days' across simulated fits
 extracted |>

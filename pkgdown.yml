@@ -2,7 +2,7 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2026-07-24T17:53Z
+last_built: 2026-07-31T14:58Z
 urls:
   reference: https://iancero.github.io/rollout/reference
   article: https://iancero.github.io/rollout/articles

@@ -56,7 +56,10 @@ typically inside <code><a href="evaluate_model_results.html">evaluate_model_resu
 <dt id="arg-term">term<a class="anchor" aria-label="anchor" href="#arg-term"></a></dt>
 <dd><p>A named list of numeric vectors of length 2, giving the lower and upper bounds for each term.
 For example, <code>list("(Intercept)" = c(-1, 1), x = c(1, 3))</code>.
-If <code>NULL</code> (default), the interval is assumed to be <code>[0, 1]</code>.</p></dd>
+If <code>NULL</code> (default), the interval is assumed to be <code>[0, 1]</code>.
+Bounds may be numeric literals or expressions that reference grouping variables
+(e.g., <code>list(conditionimpl = c(beta - 0.1, beta + 0.1))</code> when the results are grouped
+by <code>beta</code>). Each element must resolve to a length-2 vector within the current group.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>

@@ -55,7 +55,10 @@ typically inside <code><a href="evaluate_model_results.html">evaluate_model_resu
 
 <dt id="arg-term">term<a class="anchor" aria-label="anchor" href="#arg-term"></a></dt>
 <dd><p>A named numeric vector providing the threshold for each term.
-For example, <code>c("(Intercept)" = 0, x = 2)</code>. If <code>NULL</code> (default), threshold is assumed to be zero.</p></dd>
+For example, <code>c("(Intercept)" = 0, x = 2)</code>. If <code>NULL</code> (default), threshold is assumed to be zero.
+Thresholds may be numeric literals or expressions that reference grouping variables
+(e.g., <code>c(conditionimpl = beta)</code> when the results are grouped by <code>beta</code>). Each element
+must resolve to a single value within the current group.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
