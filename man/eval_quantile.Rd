@@ -10,7 +10,10 @@ eval_quantile(x, term = NULL, na.rm = FALSE)
 \item{x}{A numeric vector of estimates or statistics.}
 
 \item{term}{A named numeric vector with quantile probabilities for each term.
-For example, \code{c("(Intercept)" = 0.05, x = 0.95)}. If \code{NULL} (default), computes the median (0.5).}
+For example, \code{c("(Intercept)" = 0.05, x = 0.95)}. If \code{NULL} (default), computes the median (0.5).
+Probabilities may be numeric literals or expressions that reference grouping variables
+(e.g., \code{c(conditionimpl = p)} when the results are grouped by \code{p}). Each element must
+resolve to a single value within the current group.}
 
 \item{na.rm}{Logical; whether to remove missing values when computing the quantile.
 Defaults to \code{FALSE}.}

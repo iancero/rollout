@@ -10,7 +10,10 @@ eval_less_than(x, term = NULL, na.rm = FALSE)
 \item{x}{A numeric vector of estimates or statistics.}
 
 \item{term}{A named numeric vector providing the threshold for each term.
-For example, \code{c("(Intercept)" = 0, x = 2)}. If \code{NULL} (default), threshold is assumed to be zero.}
+For example, \code{c("(Intercept)" = 0, x = 2)}. If \code{NULL} (default), threshold is assumed to be zero.
+Thresholds may be numeric literals or expressions that reference grouping variables
+(e.g., \code{c(conditionimpl = beta)} when the results are grouped by \code{beta}). Each element
+must resolve to a single value within the current group.}
 
 \item{na.rm}{Logical; whether to remove missing values when computing the proportion.
 Defaults to \code{FALSE}.}

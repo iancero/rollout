@@ -20,7 +20,10 @@ like \code{term}, \code{estimate}, \code{std.error}, \code{statistic}, and \code
 
 \item{...}{Additional summary expressions to compute within \code{dplyr::summarise()}.
 These may include calls to helper functions like \code{eval_bias()}, \code{eval_quantile()},
-or direct summaries such as \code{mean(estimate, na.rm = TRUE)}.}
+or direct summaries such as \code{mean(estimate, na.rm = TRUE)}.
+The \code{term} argument of the \verb{eval_*()} helpers may reference grouping variables
+(e.g., \code{eval_bias(estimate, term = c(conditionimpl = beta))} when grouped by
+\code{beta}), so that true values can vary across simulated parameter conditions.}
 
 \item{.summarise_standard_broom}{Logical; if \code{TRUE}, computes mean and standard deviation
 for standard \code{broom} columns present in the data (columns in \code{broom_cols}).

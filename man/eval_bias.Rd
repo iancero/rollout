@@ -11,7 +11,11 @@ eval_bias(x, term = NULL, na.rm = FALSE, warnings = TRUE)
 
 \item{term}{A named numeric vector providing the true value for each term.
 For example, \code{c("(Intercept)" = 0, x = 2)} to specify the true values for each term.
-If \code{NULL} (default), bias is computed relative to zero.}
+If \code{NULL} (default), bias is computed relative to zero.
+Values may be numeric literals or expressions that reference grouping variables
+(e.g., \code{c(conditionimpl = beta)} when the results are grouped by \code{beta}), allowing
+the true value to vary across simulated parameter conditions. Each element must
+resolve to a single value within the current group.}
 
 \item{na.rm}{Logical; whether to remove missing values when computing the mean bias.
 Defaults to \code{FALSE}.}
@@ -62,6 +66,23 @@ sim_models |>
   group_by(term) |>
   evaluate_model_results(
     bias = eval_bias(estimate)
+  )
+
+# True values may reference grouping variables, allowing them to vary
+# across simulated parameter conditions (here, a different true effect
+# for each value of `beta`):
+sim_grid <- tidyr::expand_grid(
+  beta = c(0.35, 0.65),
+  term = "conditionimpl",
+  rep = 1:20
+) |>
+  mutate(estimate = beta + rnorm(40, sd = 0.05))
+
+sim_grid |>
+  group_by(beta, term) |>
+  summarise(
+    bias = eval_bias(estimate, term = c(conditionimpl = beta)),
+    .groups = "drop"
   )
 
 }
