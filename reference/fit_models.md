@@ -84,56 +84,63 @@ datasets <- tibble(
   })
 )
 
-# Fit linear mixed models in parallel
+# Fit linear mixed models in parallel (lmerTest adds the p-values that
+# evaluate_model_results() uses to compute power)
 fitted_models <- fit_models(
   datasets,
   .x = data,
-  .f = ~ lme4::lmer(Reaction ~ Days + (Days | Subject), data = .),
-  packages = c("lme4"),
+  .f = ~ lmerTest::lmer(Reaction ~ Days + (Days | Subject), data = .),
+  packages = c("lmerTest"),
   n_cores = 1
 )
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 
 # Inspect the first fitted mixed model
 summary(fitted_models$model[[1]])
-#> Linear mixed model fit by REML ['lmerMod']
+#> Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+#> lmerModLmerTest]
 #> Formula: Reaction ~ Days + (Days | Subject)
 #>    Data: .
 #> 
-#> REML criterion at convergence: 516.4
+#> REML criterion at convergence: 469.9
 #> 
 #> Scaled residuals: 
-#>     Min      1Q  Median      3Q     Max 
-#> -1.5059 -0.3816 -0.0229  0.2241  4.1212 
+#>      Min       1Q   Median       3Q      Max 
+#> -1.81615 -0.32564  0.01431  0.34205  2.65244 
 #> 
 #> Random effects:
 #>  Groups   Name        Variance Std.Dev. Corr  
-#>  Subject  (Intercept)  900.02  30.000         
-#>           Days          59.38   7.706   -0.47 
-#>  Residual             1301.58  36.077         
+#>  Subject  (Intercept) 722.34   26.876         
+#>           Days         68.83    8.296   -0.38 
+#>  Residual             291.73   17.080         
 #> Number of obs: 50, groups:  Subject, 17
 #> 
 #> Fixed effects:
-#>             Estimate Std. Error t value
-#> (Intercept)  262.066     12.755  20.546
-#> Days           7.827      2.866   2.731
+#>             Estimate Std. Error      df t value Pr(>|t|)    
+#> (Intercept)  255.240      8.548  15.061  29.860 8.08e-15 ***
+#> Days           8.004      2.571  10.163   3.113   0.0108 *  
+#> ---
+#> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #> 
 #> Correlation of Fixed Effects:
 #>      (Intr)
-#> Days -0.682
+#> Days -0.520
 
 # Tidy the fitted models using extract_model_results() for further evaluation
 extracted <- extract_model_results(fitted_models)
 head(extracted)
-#> # A tibble: 6 × 9
-#>      id data          model     effect  group term  estimate std.error statistic
-#>   <int> <list>        <list>    <chr>   <chr> <chr>    <dbl>     <dbl>     <dbl>
-#> 1     1 <df [50 × 3]> <lmerMod> fixed   NA    (Int…  262.        12.8      20.5 
-#> 2     1 <df [50 × 3]> <lmerMod> fixed   NA    Days     7.83       2.87      2.73
-#> 3     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… sd__…   30.0       NA        NA   
-#> 4     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… sd__…    7.71      NA        NA   
-#> 5     1 <df [50 × 3]> <lmerMod> ran_pa… Subj… cor_…   -0.475     NA        NA   
-#> 6     1 <df [50 × 3]> <lmerMod> ran_pa… Resi… sd__…   36.1       NA        NA   
+#> # A tibble: 6 × 11
+#>      id data   model      effect  group term  estimate std.error statistic    df
+#>   <int> <list> <list>     <chr>   <chr> <chr>    <dbl>     <dbl>     <dbl> <dbl>
+#> 1     1 <df>   <lmrMdLmT> fixed   NA    (Int…  255.         8.55     29.9   15.1
+#> 2     1 <df>   <lmrMdLmT> fixed   NA    Days     8.00       2.57      3.11  10.2
+#> 3     1 <df>   <lmrMdLmT> ran_pa… Subj… sd__…   26.9       NA        NA     NA  
+#> 4     1 <df>   <lmrMdLmT> ran_pa… Subj… sd__…    8.30      NA        NA     NA  
+#> 5     1 <df>   <lmrMdLmT> ran_pa… Subj… cor_…   -0.377     NA        NA     NA  
+#> 6     1 <df>   <lmrMdLmT> ran_pa… Resi… sd__…   17.1       NA        NA     NA  
+#> # ℹ 1 more variable: p.value <dbl>
 
 # Summarise estimates for 'Days' across simulated fits
 extracted |>
@@ -142,7 +149,8 @@ extracted |>
     mean_estimate = mean(estimate, na.rm = TRUE),
     sd_estimate = sd(estimate, na.rm = TRUE)
   )
-#> Error in dplyr::summarise(results, n_models = dplyr::n(), mean_estimate = dplyr::if_else(all(is.na(p.value)),     NA_real_, mean(estimate, na.rm = TRUE)), mean_std.error = dplyr::if_else(all(is.na(p.value)),     NA_real_, mean(std.error, na.rm = TRUE)), power = dplyr::if_else(all(is.na(p.value)),     NA_real_, mean(p.value < alpha, na.rm = TRUE)), !!!summary_exprs,     !!!{        if (.summarise_standard_broom) {            rlang::exprs(dplyr::across(dplyr::all_of(intersect(broom_cols,                 names(results))), list(mean = base::mean, sd = stats::sd),                 .names = "{fn}_{col}"))        }        else {            rlang::exprs()        }    }): ℹ In argument: `mean_estimate = dplyr::if_else(...)`.
-#> Caused by error:
-#> ! object 'p.value' not found
+#> # A tibble: 1 × 5
+#>   n_models mean_estimate mean_std.error power sd_estimate
+#>      <int>         <dbl>          <dbl> <dbl>       <dbl>
+#> 1        5          9.21           2.13     1        1.48
 ```

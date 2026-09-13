@@ -52,6 +52,19 @@
   and
   [`eval_less_than()`](https://iancero.github.io/rollout/reference/eval_less_than.md)
   also now reference the correct function names.
+- New function
+  [`eval_coverage()`](https://iancero.github.io/rollout/reference/eval_coverage.md)
+  computes confidence interval coverage across simulation replicates,
+  i.e. the proportion of replicates whose interval `[lower, upper]`
+  contains the true value for each term. It is designed to be called
+  inside
+  [`evaluate_model_results()`](https://iancero.github.io/rollout/reference/evaluate_model_results.md)
+  alongside the other `eval_*()` helpers,
+  e.g. `eval_coverage(term = c(conditionintv = b_intv))` when results
+  are grouped by `b_intv` and `term`. `lower` and `upper` default to the
+  `conf.low` and `conf.high` columns created by
+  `extract_model_results(tidy_fun = \(m) broom.mixed::tidy(m, conf.int = TRUE))`.
+  When `term = NULL`, coverage is computed for a true value of zero.
 
 ## rollout 0.1.0
 

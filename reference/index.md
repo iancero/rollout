@@ -24,6 +24,9 @@
 - [`eval_bias()`](https://iancero.github.io/rollout/reference/eval_bias.md)
   : Compute bias relative to term-specific true values within grouped
   simulation results
+- [`eval_coverage()`](https://iancero.github.io/rollout/reference/eval_coverage.md)
+  : Compute confidence interval coverage of term-specific true values
+  within grouped simulation results
 - [`eval_greater_than()`](https://iancero.github.io/rollout/reference/eval_greater_than.md)
   : Compute the proportion of values above term-specific thresholds
   within grouped simulation results
