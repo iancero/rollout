@@ -643,6 +643,155 @@ eval_quantile <- function(x, term = NULL, na.rm = FALSE) {
 }
 
 
+#' Compute confidence interval coverage of term-specific true values within grouped simulation results
+#'
+#' Computes the proportion of replicates whose interval `[lower, upper]` contains the
+#' true value for the current term, typically inside `evaluate_model_results()` for
+#' simulation evaluation pipelines.
+#'
+#' @param term A named numeric vector providing the true value for each term.
+#' For example, `c("(Intercept)" = 0, x = 2)` to specify the true values for each term.
+#' If `NULL` (default), the true value is zero for all terms. When the true value really
+#' is zero, coverage is then one minus the empirical Type I error rate.
+#' Values may be numeric literals or expressions that reference grouping variables
+#' (e.g., `c(conditionimpl = beta)` when the results are grouped by `beta`), allowing
+#' the true value to vary across simulated parameter conditions. Each element must
+#' resolve to a single value within the current group.
+#' @param lower Unquoted column name or expression giving the lower bound of each
+#' replicate's interval, evaluated within the current group. Defaults to `conf.low`,
+#' the column created by `broom.mixed::tidy(m, conf.int = TRUE)`.
+#' @param upper Unquoted column name or expression giving the upper bound of each
+#' replicate's interval, evaluated within the current group. Defaults to `conf.high`,
+#' the column created by `broom.mixed::tidy(m, conf.int = TRUE)`.
+#' @param na.rm A logical value indicating whether to remove missing values when
+#' computing the proportion. Defaults to `FALSE`.
+#'
+#' @return A numeric scalar representing the proportion of intervals containing the
+#' term-specific true value within the current group.
+#'
+#' @details
+#' This function is designed to be used inside `dplyr::summarise()` within a grouped
+#' tidyverse pipeline, typically after grouping by `term`. It computes the mean of
+#' `truth >= lower & truth <= upper`, where `truth` is the true value for the
+#' corresponding term. Interval bounds are inclusive.
+#'
+#' There is no `level` argument. The confidence level is whatever was chosen when the
+#' models were tidied (e.g., `conf.level` in `broom::tidy()`, which defaults to 0.95).
+#'
+#' The Monte Carlo standard error of the coverage estimate is
+#' `sqrt(coverage * (1 - coverage) / n_models)`, where `n_models` is already returned
+#' by `evaluate_model_results()`.
+#'
+#' If `term` is provided, the current grouping must include a `term` variable matching
+#' the names in `term`. If a term in the group is not found in the provided `term` mapping,
+#' the function will return `NA`.
+#'
+#' @examples
+#' library(dplyr)
+#' library(purrr)
+#' library(broom.mixed)
+#'
+#' # Simulate and fit models, keeping confidence intervals when tidying
+#' sim_models <- tibble(
+#'   id = 1:50,
+#'   model = map(1:50, ~ lm(mpg ~ wt, data = mtcars))
+#' ) |>
+#'   extract_model_results(tidy_fun = \(m) broom::tidy(m, conf.int = TRUE))
+#'
+#' # Compute coverage of the true value (hypothetical slope = -5)
+#' sim_models |>
+#'   filter(term == "wt") |>
+#'   group_by(term) |>
+#'   evaluate_model_results(
+#'     coverage = eval_coverage(
+#'       term = c("wt" = -5)
+#'     )
+#'   )
+#'
+#' # Compute coverage of zero for all terms
+#' sim_models |>
+#'   group_by(term) |>
+#'   evaluate_model_results(
+#'     coverage = eval_coverage()
+#'   )
+#'
+#' # True values may reference grouping variables, allowing them to vary
+#' # across simulated parameter conditions (here, a different true effect
+#' # for each value of `beta`):
+#' sim_grid <- tidyr::expand_grid(
+#'   beta = c(0.35, 0.65),
+#'   term = "conditionimpl",
+#'   rep = 1:20
+#' ) |>
+#'   mutate(
+#'     estimate = beta + rnorm(40, sd = 0.05),
+#'     conf.low = estimate - 1.96 * 0.05,
+#'     conf.high = estimate + 1.96 * 0.05
+#'   )
+#'
+#' sim_grid |>
+#'   group_by(beta, term) |>
+#'   summarise(
+#'     coverage = eval_coverage(term = c(conditionimpl = beta)),
+#'     .groups = "drop"
+#'   )
+#'
+#' @export
+eval_coverage <- function(term = NULL, lower = conf.low, upper = conf.high, na.rm = FALSE) {
+  # The `conf.low` and `conf.high` defaults are never evaluated, because a
+  # default is evaluated in this function's frame rather than dplyr's data
+  # mask and would not resolve. When `lower` or `upper` is missing, the
+  # column is instead fetched from the current group.
+  lower_quo <- if (missing(lower)) rlang::quo(NULL) else rlang::enquo(lower)
+  upper_quo <- if (missing(upper)) rlang::quo(NULL) else rlang::enquo(upper)
+
+  lower <- resolve_interval_arg(lower_quo, arg_name = "lower", default_col = "conf.low")
+  upper <- resolve_interval_arg(upper_quo, arg_name = "upper", default_col = "conf.high")
+
+  if (!is.numeric(lower) || !is.numeric(upper)) {
+    abort("`lower` and `upper` must be numeric.")
+  }
+
+  if (length(lower) != length(upper)) {
+    abort(glue::glue(
+      "`lower` and `upper` must be the same length, but `lower` has length ",
+      "{length(lower)} and `upper` has length {length(upper)}."
+    ))
+  }
+
+  if (any(lower > upper, na.rm = TRUE)) {
+    abort("`lower` must be less than or equal to `upper` wherever both are non-missing.")
+  }
+
+  term <- resolve_term_arg(rlang::enquo(term), fn_name = "eval_coverage")
+
+  if (is.null(term)) {
+    return(mean(0 >= lower & 0 <= upper, na.rm = na.rm))
+  }
+
+  if (!is.numeric(term)) {
+    abort("`term` must be a named numeric vector of true values (e.g., c(x = 0)).")
+  }
+
+  group_vars <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
+  if (is.null(group_vars) || length(group_vars) == 0) {
+    abort("`eval_coverage()` must be used inside a grouped `dplyr` context when `term` is provided.")
+  }
+
+  if (!"term" %in% names(group_vars)) {
+    abort("Grouping variable `term` not found. Are you grouping by `term` before calling `eval_coverage()`?")
+  }
+
+  current_term <- as.character(group_vars$term)
+  if (!current_term %in% names(term)) {
+    return(NA_real_)
+  }
+
+  truth <- term[[current_term]]
+  mean(truth >= lower & truth <= upper, na.rm = na.rm)
+}
+
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
@@ -760,4 +909,41 @@ abort_nonscalar_term <- function(fn_name, bad_names, bad_lens, element_length) {
     "(e.g., `conditionimpl = beta`), add that column to `group_by()` ",
     "(e.g., `group_by(beta, term)`) so it resolves to one value per group."
   ))
+}
+
+#' Resolve the `lower` or `upper` argument of `eval_coverage()`
+#'
+#' A user-supplied quosure is evaluated against the columns of the current
+#' group, so it may be a bare column name (e.g., `lo`) or an expression (e.g.,
+#' `estimate - 1.96 * std.error`). When the quosure is `NULL`, the default
+#' broom column (`conf.low` or `conf.high`) is fetched from the current group
+#' instead, aborting with guidance if that column does not exist.
+#'
+#' @param bound_quo A quosure capturing `lower` or `upper`.
+#' @param arg_name Name of the argument being resolved, used in error messages.
+#' @param default_col Name of the column to use when `bound_quo` is `NULL`.
+#'
+#' @return A vector of interval bounds for the current group.
+#' @noRd
+resolve_interval_arg <- function(bound_quo, arg_name, default_col) {
+  if (!rlang::quo_is_null(bound_quo)) {
+    group_data <- tryCatch(dplyr::pick(dplyr::everything()), error = function(e) NULL)
+    return(rlang::eval_tidy(bound_quo, data = group_data))
+  }
+
+  bound <- tryCatch(
+    dplyr::pick(dplyr::all_of(default_col))[[default_col]],
+    error = function(e) NULL
+  )
+
+  if (is.null(bound)) {
+    abort(glue::glue(
+      "`eval_coverage()` could not find the `{default_col}` column used by default ",
+      "for `{arg_name}`. Either run `extract_model_results()` with ",
+      "`tidy_fun = \\(m) broom.mixed::tidy(m, conf.int = TRUE)` so that `conf.low` ",
+      "and `conf.high` are created, or pass `lower` and `upper` explicitly."
+    ))
+  }
+
+  bound
 }

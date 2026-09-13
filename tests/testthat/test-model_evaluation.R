@@ -235,3 +235,153 @@ test_that("eval_between() aborts helpfully when a bound is not constant in the g
     regexp = "group_by"
   )
 })
+
+# Confidence interval coverage -------------------------------------------------
+
+test_that("eval_coverage() with term = NULL computes coverage of zero", {
+  # Bounds are inclusive, so the last interval [-0.5, 0] covers zero
+  df <- tibble::tibble(
+    conf.low = c(-1, -2, 0.5, -0.5),
+    conf.high = c(1, 2, 1.5, 0)
+  )
+
+  out <- df |>
+    dplyr::summarise(coverage = eval_coverage())
+
+  expect_equal(out$coverage, 0.75)
+})
+
+test_that("eval_coverage() applies literal term-specific true values", {
+  df <- tibble::tibble(
+    term = rep(c("a", "b"), each = 2),
+    conf.low = c(-1, 1, 9, 8),
+    conf.high = c(1, 3, 11, 12)
+  )
+
+  out <- df |>
+    dplyr::group_by(term) |>
+    dplyr::summarise(coverage = eval_coverage(term = c(a = 0, b = 10)))
+
+  expect_equal(out$coverage[out$term == "a"], 0.5)
+  expect_equal(out$coverage[out$term == "b"], 1)
+})
+
+test_that("eval_coverage() silently returns NA for terms missing from the mapping", {
+  df <- tibble::tibble(term = c("a", "a"), conf.low = c(-1, -1), conf.high = c(1, 1))
+
+  expect_no_warning(
+    out <- df |>
+      dplyr::group_by(term) |>
+      dplyr::summarise(coverage = eval_coverage(term = c(other = 0)))
+  )
+
+  expect_identical(out$coverage, NA_real_)
+})
+
+test_that("eval_coverage() resolves true values from grouping variables", {
+  df <- tidyr::expand_grid(
+    b_intv = c(0.2, 0.6),
+    term = "conditionintv",
+    center = c(0.2, 0.6, 0.6, 0.8)
+  ) |>
+    dplyr::mutate(conf.low = center - 0.05, conf.high = center + 0.05)
+
+  out <- df |>
+    dplyr::group_by(b_intv, term) |>
+    dplyr::summarise(
+      coverage = eval_coverage(term = c(conditionintv = b_intv)),
+      .groups = "drop"
+    )
+
+  # b_intv = 0.2 falls inside one of the four intervals, b_intv = 0.6 inside two
+  expect_equal(out$coverage, c(0.25, 0.5))
+})
+
+test_that("eval_coverage() accepts explicitly supplied `lower` and `upper`", {
+  # The default columns would give full coverage, so matching 1/3 shows they are ignored
+  df <- tibble::tibble(
+    term = "a",
+    estimate = c(0.5, 3, -2.5),
+    std.error = c(0.5, 1, 0.25),
+    lo = c(-1, 1, -3),
+    hi = c(1, 2, -2),
+    conf.low = -10,
+    conf.high = 10
+  )
+
+  out <- df |>
+    dplyr::group_by(term) |>
+    dplyr::summarise(
+      coverage_cols = eval_coverage(term = c(a = 0), lower = lo, upper = hi),
+      coverage_expr = eval_coverage(
+        term = c(a = 0),
+        lower = estimate - 2 * std.error,
+        upper = estimate + 2 * std.error
+      )
+    )
+
+  expect_equal(out$coverage_cols, 1 / 3)
+  expect_equal(out$coverage_expr, 1 / 3)
+})
+
+test_that("eval_coverage() explains how to get the default interval columns", {
+  df <- tibble::tibble(term = "a", estimate = c(1, 2))
+
+  expect_error(
+    df |>
+      dplyr::group_by(term) |>
+      dplyr::summarise(coverage = eval_coverage()),
+    regexp = "conf.int = TRUE",
+    fixed = TRUE
+  )
+})
+
+test_that("eval_coverage() aborts when `lower` exceeds `upper`", {
+  df <- tibble::tibble(conf.low = c(-1, 2), conf.high = c(1, 1))
+
+  expect_error(
+    df |>
+      dplyr::summarise(coverage = eval_coverage()),
+    regexp = "less than or equal to"
+  )
+})
+
+test_that("eval_coverage() respects `na.rm`", {
+  df <- tibble::tibble(
+    conf.low = c(-1, NA, -1, 1),
+    conf.high = c(1, NA, 1, 2)
+  )
+
+  out <- df |>
+    dplyr::summarise(
+      coverage_keep_na = eval_coverage(),
+      coverage_drop_na = eval_coverage(na.rm = TRUE)
+    )
+
+  expect_true(is.na(out$coverage_keep_na))
+  expect_equal(out$coverage_drop_na, 2 / 3)
+})
+
+test_that("eval_coverage() works when spliced through evaluate_model_results()", {
+  df <- tidyr::expand_grid(
+    b_intv = c(0.2, 0.6),
+    term = "conditionintv",
+    estimate = c(0.2, 0.6, 0.6, 0.8)
+  ) |>
+    dplyr::mutate(
+      std.error = 0.025,
+      p.value = 0.01,
+      conf.low = estimate - 0.05,
+      conf.high = estimate + 0.05
+    )
+
+  out <- df |>
+    dplyr::group_by(b_intv, term) |>
+    evaluate_model_results(
+      ci_coverage = eval_coverage(term = c(conditionintv = b_intv))
+    ) |>
+    dplyr::ungroup()
+
+  expect_equal(out$ci_coverage, c(0.25, 0.5))
+  expect_equal(out$n_models, c(4, 4))
+})
