@@ -43,12 +43,13 @@
 #'   })
 #' )
 #'
-#' # Fit linear mixed models in parallel
+#' # Fit linear mixed models in parallel (lmerTest adds the p-values that
+#' # evaluate_model_results() uses to compute power)
 #' fitted_models <- fit_models(
 #'   datasets,
 #'   .x = data,
-#'   .f = ~ lme4::lmer(Reaction ~ Days + (Days | Subject), data = .),
-#'   packages = c("lme4"),
+#'   .f = ~ lmerTest::lmer(Reaction ~ Days + (Days | Subject), data = .),
+#'   packages = c("lmerTest"),
 #'   n_cores = 1
 #')
 #'
