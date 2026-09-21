@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rollout</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,9 @@
       <small>Source: <a href="https://github.com/iancero/rollout/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="rollout-development-version">rollout (development version)<a class="anchor" aria-label="anchor" href="#rollout-development-version"></a></h2>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="rollout-020">rollout 0.2.0<a class="anchor" aria-label="anchor" href="#rollout-020"></a></h2>
 <ul><li>New function <code><a href="../reference/add_binomial_outcome.html">add_binomial_outcome()</a></code> generalizes <code><a href="../reference/add_binary_outcome.html">add_binary_outcome()</a></code> to support a binomial outcome with more than one trial. <code>size</code> (the number of trials, i.e. the denominator) can be a fixed value or the name of an existing column, so a per-row size that varies — e.g. a Poisson-distributed eligible count generated upstream with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> — can be piped straight in: <code>add_binomial_outcome(size = n_eligible, ...)</code>. <code><a href="../reference/add_binary_outcome.html">add_binary_outcome()</a></code> is now a <code>size = 1</code> special case of this function.</li>
