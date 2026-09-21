@@ -1,6 +1,6 @@
 Package: rollout
 Title: Tools for Designing, Simulating, and Analyzing Implementation Rollout Trials
-Version: 0.2.0
+Version: 0.2.0.9000
 Authors@R: c(
     person("Ian", "Cero",
            email = "ian_cero@urmc.rochester.edu",
