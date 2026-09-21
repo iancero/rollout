@@ -14,13 +14,13 @@ Source:
 [`DESCRIPTION`](https://github.com/iancero/rollout/blob/main/DESCRIPTION)
 
 Cero I, Brown C (2026). *rollout: Tools for Designing, Simulating, and
-Analyzing Implementation Rollout Trials*. R package version 0.1.0,
+Analyzing Implementation Rollout Trials*. R package version 0.2.0,
 <https://github.com/iancero/rollout>.
 
     @Manual{,
       title = {rollout: Tools for Designing, Simulating, and Analyzing Implementation Rollout Trials},
       author = {Ian Cero and C. Hendricks Brown},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 0.2.0},
       url = {https://github.com/iancero/rollout},
     }
